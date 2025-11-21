@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Header from './components/Header';
 import Planner from './components/Planner';
 import Finance from './components/Finance';
@@ -13,9 +13,9 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<View>('home');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [lang, setLang] = useState<Language>('zh'); // Default to Chinese
-  const [greeting, setGreeting] = useState<GreetingData>({
-    emoji: '☀️',
-    text: '早安, 开始高效的一天。'
+  const [greeting, setGreeting] = useState<GreetingData>(() => {
+    const saved = localStorage.getItem('norton_greeting');
+    return saved ? JSON.parse(saved) : { emoji: '☀️', text: '早安, 开始高效的一天。' };
   });
   
   // Helper for date strings
@@ -26,21 +26,61 @@ const App: React.FC = () => {
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
 
-  // Initial dummy data
-  const [tasks, setTasks] = useState<Task[]>([
+  // DUMMY DATA CONSTANTS
+  const INITIAL_TASKS: Task[] = [
     { id: '1', text: '完成项目报告', completed: false, period: 'day', priority: 'high', date: todayStr, createdAt: Date.now() },
     { id: '2', text: '健身房锻炼', completed: true, period: 'day', priority: 'medium', date: todayStr, createdAt: Date.now() - 10000 },
     { id: '3', text: '超市采购', completed: false, period: 'day', priority: 'low', date: yesterdayStr, createdAt: Date.now() },
     { id: '4', text: '准备周会材料', completed: false, period: 'week', priority: 'high', date: todayStr, createdAt: Date.now() },
-  ]);
+  ];
 
-  const [transactions, setTransactions] = useState<Transaction[]>([
+  const INITIAL_TRANSACTIONS: Transaction[] = [
     { id: '1', amount: 15000, type: 'income', category: 'Salary', description: '三月工资', date: Date.now() - 86400000 * 2 },
     { id: '2', amount: 45, type: 'expense', category: 'Food', description: '午餐', date: Date.now() },
     { id: '3', amount: 2400, type: 'expense', category: 'Housing', description: '房租', date: Date.now() - 86400000 },
     { id: '4', amount: 320, type: 'expense', category: 'Transport', description: '地铁充值', date: Date.now() },
     { id: '5', amount: 580, type: 'expense', category: 'Shopping', description: '买衣服', date: Date.now() - 86400000 * 5 },
-  ]);
+  ];
+
+  // Initialize State from LocalStorage or fallback to Dummy Data
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = localStorage.getItem('norton_tasks');
+    return saved ? JSON.parse(saved) : INITIAL_TASKS;
+  });
+
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const saved = localStorage.getItem('norton_transactions');
+    return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
+  });
+
+  // Persistence Effects
+  useEffect(() => {
+    localStorage.setItem('norton_tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('norton_transactions', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('norton_greeting', JSON.stringify(greeting));
+  }, [greeting]);
+
+  const handleClearData = (type: 'tasks' | 'transactions' | 'all') => {
+      if (type === 'tasks' || type === 'all') {
+          setTasks([]);
+      }
+      if (type === 'transactions' || type === 'all') {
+          setTransactions([]);
+      }
+      // If all, we can also reset greeting if we wanted, but let's keep it personalized.
+      if (type === 'all') {
+          // Optional: Restore defaults if user prefers, but usually "clear" means empty.
+          // Uncomment below to reset to factory demo data instead of empty
+          // setTasks(INITIAL_TASKS);
+          // setTransactions(INITIAL_TRANSACTIONS);
+      }
+  };
 
   const tasksMap = useMemo(() => {
     const map: Record<string, boolean> = {};
@@ -59,7 +99,13 @@ const App: React.FC = () => {
         <div className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] bg-indigo-100/40 rounded-full blur-[100px] opacity-50 mix-blend-multiply"></div>
       </div>
 
-      <Header activeView={activeView} setView={setActiveView} lang={lang} setLang={setLang} />
+      <Header 
+        activeView={activeView} 
+        setView={setActiveView} 
+        lang={lang} 
+        setLang={setLang} 
+        onClearData={handleClearData}
+      />
       
       <main className="max-w-3xl mx-auto px-4 py-8">
         {activeView === 'home' && (

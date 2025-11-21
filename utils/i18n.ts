@@ -4,6 +4,18 @@ import { Language } from '../types';
 export const translations = {
   zh: {
     nav: { home: '首页', calendar: '日历', planner: '计划', finance: '记账', dashboard: '报表' },
+    settings: {
+      title: '设置',
+      clear_data: '数据管理',
+      clear_tasks: '清空所有任务',
+      clear_finance: '清空所有账目',
+      reset_all: '重置所有数据 (恢复出厂)',
+      confirm_title: '确认操作',
+      confirm_msg: '此操作无法撤销，确定要清空吗？',
+      cancel: '取消',
+      confirm: '确认清除',
+      cleared: '数据已清除'
+    },
     home: {
       pending_tasks: '今日剩余任务',
       view_details: '去查看',
@@ -72,6 +84,18 @@ export const translations = {
   },
   en: {
     nav: { home: 'Home', calendar: 'Calendar', planner: 'Planner', finance: 'Finance', dashboard: 'Stats' },
+    settings: {
+      title: 'Settings',
+      clear_data: 'Data Management',
+      clear_tasks: 'Clear All Tasks',
+      clear_finance: 'Clear All Transactions',
+      reset_all: 'Factory Reset',
+      confirm_title: 'Are you sure?',
+      confirm_msg: 'This action cannot be undone.',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      cleared: 'Data Cleared'
+    },
     home: {
       pending_tasks: 'Pending Tasks',
       view_details: 'View',
