@@ -324,7 +324,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
               </div>
             </div>
             <div className="flex items-center gap-3">
-                <span className={`font-bold font-mono text-base ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}`}>
+                <span className={`font-bold font-mono text-base ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-500'}`}>
                 {t.type === 'income' ? '+' : '-'}{Math.abs(t.amount).toFixed(2)}
                 </span>
                 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings, Globe, Trash2, X, RotateCcw } from 'lucide-react';
+import { Settings, Globe, Trash2, X, RotateCcw, AlertTriangle, HardDrive } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -71,41 +71,69 @@ const Header: React.FC<HeaderProps> = ({ lang, setLang, onClearData }) => {
 
       {/* Settings Modal */}
       {showSettings && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden animate-in zoom-in-95 duration-200 border border-white">
-                  <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-                      <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                          <Settings size={18} className="text-blue-500"/> {t.title}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm animate-in fade-in duration-300">
+              <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 border border-white/50 relative">
+                  
+                  {/* Modal Header */}
+                  <div className="p-6 pb-4 border-b border-slate-100 flex justify-between items-center bg-gradient-to-b from-white to-slate-50/50">
+                      <h3 className="font-bold text-xl text-slate-800 flex items-center gap-2">
+                          <div className="p-2 bg-blue-100 rounded-xl text-blue-600">
+                              <Settings size={20} />
+                          </div>
+                          {t.title}
                       </h3>
-                      <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-slate-100 rounded-full transition-colors">
-                          <X size={20} className="text-slate-400" />
+                      <button onClick={() => setShowSettings(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors active:scale-95">
+                          <X size={18} className="text-slate-500" />
                       </button>
                   </div>
-                  <div className="p-5 space-y-3">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.clear_data}</p>
+
+                  {/* Modal Content */}
+                  <div className="p-6 space-y-6">
                       
-                      <button 
-                        onClick={() => handleClear('tasks')}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-600 transition-colors text-sm font-medium border border-transparent hover:border-red-100"
-                      >
-                          <Trash2 size={16} /> {t.clear_tasks}
-                      </button>
+                      {/* Data Management Section */}
+                      <div>
+                          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <HardDrive size={12} /> {t.clear_data}
+                          </h4>
+                          <div className="space-y-2">
+                              <button 
+                                onClick={() => handleClear('tasks')}
+                                className="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 transition-all active:scale-98 group border border-slate-100"
+                              >
+                                  <div className="flex items-center gap-3">
+                                      <div className="w-2 h-2 rounded-full bg-orange-400 group-hover:scale-125 transition-transform"></div>
+                                      <span className="font-medium text-sm">{t.clear_tasks}</span>
+                                  </div>
+                                  <Trash2 size={16} className="text-slate-400 group-hover:text-orange-500 transition-colors" />
+                              </button>
 
-                      <button 
-                        onClick={() => handleClear('transactions')}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-600 transition-colors text-sm font-medium border border-transparent hover:border-red-100"
-                      >
-                          <Trash2 size={16} /> {t.clear_finance}
-                      </button>
+                              <button 
+                                onClick={() => handleClear('transactions')}
+                                className="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 transition-all active:scale-98 group border border-slate-100"
+                              >
+                                  <div className="flex items-center gap-3">
+                                      <div className="w-2 h-2 rounded-full bg-blue-400 group-hover:scale-125 transition-transform"></div>
+                                      <span className="font-medium text-sm">{t.clear_finance}</span>
+                                  </div>
+                                  <Trash2 size={16} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+                              </button>
+                          </div>
+                      </div>
 
-                      <hr className="border-slate-100 my-2"/>
-
-                      <button 
-                        onClick={() => handleClear('all')}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-200 text-sm font-medium justify-center"
-                      >
-                          <Trash2 size={16} /> {t.reset_all}
-                      </button>
+                      {/* Danger Zone */}
+                      <div className="pt-2">
+                          <button 
+                            onClick={() => handleClear('all')}
+                            className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-200 transition-all active:scale-95 font-bold text-sm group relative overflow-hidden"
+                          >
+                              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                              <AlertTriangle size={18} /> {t.reset_all}
+                          </button>
+                      </div>
+                  </div>
+                  
+                  <div className="bg-slate-50 p-3 text-center">
+                      <p className="text-[10px] text-slate-400 font-medium">NortonLife v1.2.0</p>
                   </div>
               </div>
           </div>

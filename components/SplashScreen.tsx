@@ -17,7 +17,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     const timer = setTimeout(() => {
       setIsExiting(true);
       setTimeout(onFinish, 800); // Wait for exit animation to complete
-    }, 2200);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [onFinish]);
@@ -43,12 +43,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                     Norton
                 </span>
             </h1>
-            
-            <div className="mt-8 flex gap-2">
-                <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce delay-0"></div>
-                <div className="w-2.5 h-2.5 bg-sky-400 rounded-full animate-bounce delay-100"></div>
-                <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
-            </div>
         </div>
       </div>
     </div>

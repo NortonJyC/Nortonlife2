@@ -17,12 +17,16 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransactions, setView, lang, greeting, setGreeting }) => {
   const t = translations[lang].home;
+  const tf = translations[lang].finance; // Finance translations
+  
   const [quickTask, setQuickTask] = useState('');
+  const [isTaskAdded, setIsTaskAdded] = useState(false); // Animation state
   
   // Manual Quick Finance States
   const [qAmount, setQAmount] = useState('');
   const [qDesc, setQDesc] = useState('');
   const [qCategory, setQCategory] = useState('Other');
+  const [isFinanceAdded, setIsFinanceAdded] = useState(false); // Animation state
   
   // Editing State
   const [isEditingGreeting, setIsEditingGreeting] = useState(false);
@@ -47,6 +51,10 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
     };
     setTasks([newTask, ...tasks]);
     setQuickTask('');
+    
+    // Trigger Animation
+    setIsTaskAdded(true);
+    setTimeout(() => setIsTaskAdded(false), 1500);
   };
 
   const handleQuickFinance = (e: React.FormEvent) => {
@@ -67,6 +75,10 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
     setTransactions([newTrans, ...transactions]);
     setQAmount('');
     setQDesc('');
+
+    // Trigger Animation
+    setIsFinanceAdded(true);
+    setTimeout(() => setIsFinanceAdded(false), 1500);
   };
 
   const saveGreeting = () => {
@@ -138,8 +150,21 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     className="glass-input p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                 />
                 <div className="flex justify-end">
-                    <button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-xl font-medium text-sm hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200">
-                        {t.add}
+                    <button 
+                        type="submit" 
+                        className={`px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
+                            isTaskAdded 
+                            ? 'bg-emerald-500 text-white shadow-emerald-200 scale-105' 
+                            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                        }`}
+                    >
+                        {isTaskAdded ? (
+                            <>
+                                <Check size={16} className="animate-in zoom-in duration-300"/> {t.saved}
+                            </>
+                        ) : (
+                            t.add
+                        )}
                     </button>
                 </div>
             </form>
@@ -176,18 +201,29 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     <select 
                         value={qCategory}
                         onChange={(e) => setQCategory(e.target.value)}
-                        className="text-xs text-slate-500 bg-transparent outline-none cursor-pointer hover:text-sky-600"
+                        className="text-xs text-slate-500 bg-transparent outline-none cursor-pointer hover:text-sky-600 max-w-[100px]"
                     >
-                        <option value="Food">Food</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Shopping">Shopping</option>
-                        <option value="Other">Other</option>
+                        {Object.entries(tf.categories).map(([key, label]) => (
+                             <option key={key} value={key}>{label}</option>
+                        ))}
                     </select>
                     <button 
                         type="submit" 
-                        className="bg-sky-500 text-white px-5 py-2 rounded-xl font-medium text-sm hover:bg-sky-600 active:scale-95 transition-all shadow-lg shadow-sky-200 flex items-center gap-1"
+                        className={`px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
+                            isFinanceAdded 
+                            ? 'bg-emerald-500 text-white shadow-emerald-200 scale-105' 
+                            : 'bg-sky-500 text-white hover:bg-sky-600 shadow-sky-200'
+                        }`}
                     >
-                        {t.record} <ArrowRight size={14} />
+                         {isFinanceAdded ? (
+                            <>
+                                <Check size={16} className="animate-in zoom-in duration-300"/> {t.saved}
+                            </>
+                        ) : (
+                            <>
+                                {t.record} <ArrowRight size={14} />
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

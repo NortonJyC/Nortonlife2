@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Planner from './components/Planner';
@@ -21,6 +21,11 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : { emoji: '☀️', text: '早安, 开始高效的一天。' };
   });
   
+  // Swipe Logic State
+  const touchStartRef = useRef<number | null>(null);
+  const touchEndRef = useRef<number | null>(null);
+  const viewOrder: View[] = ['home', 'calendar', 'planner', 'finance', 'dashboard'];
+
   // Helper for date strings
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
@@ -96,6 +101,34 @@ const App: React.FC = () => {
     return map;
   }, [tasks]);
 
+  // Swipe Handlers
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchEndRef.current = null; 
+    touchStartRef.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndRef.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartRef.current || !touchEndRef.current) return;
+    
+    const distance = touchStartRef.current - touchEndRef.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    const currentIndex = viewOrder.indexOf(activeView);
+    
+    if (isLeftSwipe && currentIndex < viewOrder.length - 1) {
+        setActiveView(viewOrder[currentIndex + 1]);
+    }
+    
+    if (isRightSwipe && currentIndex > 0) {
+        setActiveView(viewOrder[currentIndex - 1]);
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-x-hidden text-slate-800 selection:bg-blue-200 font-sans pb-24">
       
@@ -115,10 +148,13 @@ const App: React.FC = () => {
         onClearData={handleClearData}
       />
       
-      {/* Main Content with Smooth Transitions */}
+      {/* Main Content with Smooth Transitions and Swipe Support */}
       <main 
         key={activeView}
         className={`max-w-3xl mx-auto px-4 py-1 transition-all duration-500 ${showSplash ? 'opacity-0' : 'opacity-100 animate-slide-up'}`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         {activeView === 'home' && (
           <Home 
