@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,8 +8,9 @@
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: #f1f5f9; /* Slate-100 */
-  /* Moving background gradient - Blue/White Theme */
+  /* Moving background gradient - Blue/White Theme with Top White Fade */
   background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 140px), /* Apple-like top fade */
     radial-gradient(at 0% 0%, hsla(210, 100%, 93%, 1) 0, transparent 50%), 
     radial-gradient(at 50% 0%, hsla(195, 100%, 85%, 1) 0, transparent 50%), 
     radial-gradient(at 100% 0%, hsla(217, 91%, 91%, 1) 0, transparent 50%);
@@ -72,3 +74,17 @@ body {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* Animations for Splash Screen */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }

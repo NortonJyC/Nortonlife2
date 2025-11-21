@@ -7,10 +7,12 @@ import Finance from './components/Finance';
 import Dashboard from './components/Dashboard';
 import Calendar from './components/Calendar';
 import Home from './components/Home';
+import SplashScreen from './components/SplashScreen';
 import { Task, Transaction, View, Language, GreetingData } from './types';
 import { translations } from './utils/i18n';
 
 const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeView, setActiveView] = useState<View>('home');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [lang, setLang] = useState<Language>('zh'); // Default to Chinese
@@ -86,6 +88,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden text-slate-800 selection:bg-blue-200 font-sans pb-28">
+      
+      {/* Splash Screen */}
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+
       {/* Decorative Background Blobs - Blue Theme */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-200/30 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-pulse"></div>
@@ -99,7 +105,7 @@ const App: React.FC = () => {
         onClearData={handleClearData}
       />
       
-      <main className="max-w-3xl mx-auto px-4 py-2">
+      <main className={`max-w-3xl mx-auto px-4 py-2 transition-opacity duration-700 ${showSplash ? 'opacity-0' : 'opacity-100'}`}>
         {activeView === 'home' && (
           <Home 
             tasks={tasks} 
