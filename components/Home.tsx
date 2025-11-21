@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight, DollarSign } from 'lucide-react';
-import { Task, Transaction, View, Language, GreetingData } from '../types';
+import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight, DollarSign, Calendar as CalendarIcon, Tag } from 'lucide-react';
+import { Task, Transaction, View, Language, GreetingData, TaskCategory } from '../types';
 import { translations } from '../utils/i18n';
 
 interface HomeProps {
@@ -18,8 +18,12 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransactions, setView, lang, greeting, setGreeting }) => {
   const t = translations[lang].home;
   const tf = translations[lang].finance; // Finance translations
+  const tp = translations[lang].planner; // Planner translations for categories
   
+  // Quick Task States
   const [quickTask, setQuickTask] = useState('');
+  const [quickTaskDate, setQuickTaskDate] = useState(new Date().toISOString().split('T')[0]);
+  const [quickTaskCategory, setQuickTaskCategory] = useState<TaskCategory>('life');
   const [isTaskAdded, setIsTaskAdded] = useState(false); // Animation state
   
   // Manual Quick Finance States
@@ -46,12 +50,14 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
       completed: false,
       period: 'day',
       priority: 'medium',
-      category: 'life', // Default category for quick add
-      date: todayKey,
+      category: quickTaskCategory,
+      date: quickTaskDate,
       createdAt: Date.now(),
     };
     setTasks([newTask, ...tasks]);
     setQuickTask('');
+    // Optional: Reset to defaults or keep last selection
+    // setQuickTaskDate(new Date().toISOString().split('T')[0]);
     
     // Trigger Animation
     setIsTaskAdded(true);
@@ -92,14 +98,14 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
         
       {/* Fly Animation Element (Task) */}
       {isTaskAdded && (
-        <div className="animate-fly-down flex items-center justify-center bg-blue-600 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/2 -translate-x-1/2 top-48 z-50">
+        <div className="animate-fly-down flex items-center justify-center bg-blue-600 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/4 -translate-x-1/2 top-48 z-50">
             <Check size={20} />
         </div>
       )}
 
       {/* Fly Animation Element (Finance) */}
       {isFinanceAdded && (
-        <div className="animate-fly-down flex items-center justify-center bg-emerald-500 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/2 -translate-x-1/2 top-48 z-50">
+        <div className="animate-fly-down flex items-center justify-center bg-emerald-500 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-3/4 -translate-x-1/2 top-48 z-50">
             <DollarSign size={20} />
         </div>
       )}
@@ -165,7 +171,32 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     placeholder={t.quick_task_ph}
                     className="glass-input p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                 />
-                <div className="flex justify-end">
+                
+                <div className="flex gap-2">
+                    <div className="relative flex-1">
+                        <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input 
+                            type="date"
+                            value={quickTaskDate}
+                            onChange={(e) => setQuickTaskDate(e.target.value)}
+                            className="glass-input pl-8 p-2 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-9"
+                        />
+                    </div>
+                    <div className="relative flex-1">
+                        <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <select
+                            value={quickTaskCategory}
+                            onChange={(e) => setQuickTaskCategory(e.target.value as TaskCategory)}
+                            className="glass-input pl-8 p-2 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-9 appearance-none bg-transparent cursor-pointer"
+                        >
+                            {(['work', 'life', 'study', 'health', 'other'] as TaskCategory[]).map(cat => (
+                                <option key={cat} value={cat}>{tp.categories[cat]}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="flex justify-end mt-1">
                     <button 
                         type="submit" 
                         className={`px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
