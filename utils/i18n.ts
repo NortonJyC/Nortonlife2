@@ -6,6 +6,7 @@ export const translations = {
     nav: { home: '首页', calendar: '日历', planner: '计划', finance: '记账', dashboard: '报表' },
     settings: {
       title: '设置',
+      github: '项目源码',
       clear_data: '数据管理',
       clear_tasks: '清空所有任务',
       clear_finance: '清空所有账目',
@@ -82,6 +83,7 @@ export const translations = {
     nav: { home: 'Home', calendar: 'Calendar', planner: 'Planner', finance: 'Finance', dashboard: 'Stats' },
     settings: {
       title: 'Settings',
+      github: 'GitHub Repo',
       clear_data: 'Data Management',
       clear_tasks: 'Clear All Tasks',
       clear_finance: 'Clear All Transactions',
