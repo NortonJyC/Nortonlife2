@@ -1,0 +1,5 @@
+{
+  "name": "NortonLife - AI Planner & Finance",
+  "description": "A minimalist application to manage your daily, weekly, and monthly plans while tracking income and expenses. Features AI-powered transaction entry and financial insights.",
+  "requestFramePermissions": []
+}

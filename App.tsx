@@ -1,0 +1,101 @@
+
+import React, { useState, useMemo } from 'react';
+import Header from './components/Header';
+import Planner from './components/Planner';
+import Finance from './components/Finance';
+import Dashboard from './components/Dashboard';
+import Calendar from './components/Calendar';
+import Home from './components/Home';
+import { Task, Transaction, View, Language, GreetingData } from './types';
+import { translations } from './utils/i18n';
+
+const App: React.FC = () => {
+  const [activeView, setActiveView] = useState<View>('home');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [lang, setLang] = useState<Language>('zh'); // Default to Chinese
+  const [greeting, setGreeting] = useState<GreetingData>({
+    emoji: '☀️',
+    text: '早安, 开始高效的一天。'
+  });
+  
+  // Helper for date strings
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+
+  // Initial dummy data
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: '1', text: '完成项目报告', completed: false, period: 'day', priority: 'high', date: todayStr, createdAt: Date.now() },
+    { id: '2', text: '健身房锻炼', completed: true, period: 'day', priority: 'medium', date: todayStr, createdAt: Date.now() - 10000 },
+    { id: '3', text: '超市采购', completed: false, period: 'day', priority: 'low', date: yesterdayStr, createdAt: Date.now() },
+    { id: '4', text: '准备周会材料', completed: false, period: 'week', priority: 'high', date: todayStr, createdAt: Date.now() },
+  ]);
+
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    { id: '1', amount: 15000, type: 'income', category: 'Salary', description: '三月工资', date: Date.now() - 86400000 * 2 },
+    { id: '2', amount: 45, type: 'expense', category: 'Food', description: '午餐', date: Date.now() },
+    { id: '3', amount: 2400, type: 'expense', category: 'Housing', description: '房租', date: Date.now() - 86400000 },
+    { id: '4', amount: 320, type: 'expense', category: 'Transport', description: '地铁充值', date: Date.now() },
+    { id: '5', amount: 580, type: 'expense', category: 'Shopping', description: '买衣服', date: Date.now() - 86400000 * 5 },
+  ]);
+
+  const tasksMap = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    tasks.forEach(t => {
+        if (!t.completed) map[t.date] = true;
+    });
+    return map;
+  }, [tasks]);
+
+  return (
+    <div className="min-h-screen relative overflow-x-hidden pb-20 text-slate-800 selection:bg-blue-200 font-sans">
+      {/* Decorative Background Blobs - Blue Theme */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-200/30 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-pulse"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-cyan-100/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply"></div>
+        <div className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] bg-indigo-100/40 rounded-full blur-[100px] opacity-50 mix-blend-multiply"></div>
+      </div>
+
+      <Header activeView={activeView} setView={setActiveView} lang={lang} setLang={setLang} />
+      
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        {activeView === 'home' && (
+          <Home 
+            tasks={tasks} 
+            setTasks={setTasks} 
+            transactions={transactions} 
+            setTransactions={setTransactions} 
+            setView={setActiveView}
+            lang={lang}
+            greeting={greeting}
+            setGreeting={setGreeting}
+          />
+        )}
+        {activeView === 'calendar' && (
+          <Calendar 
+            currentDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
+            tasksMap={tasksMap}
+            tasks={tasks}
+            setView={setActiveView}
+            lang={lang}
+          />
+        )}
+        {activeView === 'planner' && (
+          <Planner tasks={tasks} setTasks={setTasks} selectedDate={selectedDate} lang={lang} />
+        )}
+        {activeView === 'finance' && (
+          <Finance transactions={transactions} setTransactions={setTransactions} lang={lang} />
+        )}
+        {activeView === 'dashboard' && (
+          <Dashboard transactions={transactions} tasks={tasks} lang={lang} />
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default App;
