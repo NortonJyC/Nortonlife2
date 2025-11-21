@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Wand2, Loader2, Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank } from 'lucide-react';
+import { Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank, Check, PlusCircle } from 'lucide-react';
 import { Transaction, TransactionType, Language } from '../types';
-import { parseSmartTransaction } from '../services/geminiService';
 import { translations } from '../utils/i18n';
 
 interface FinanceProps {
@@ -13,9 +12,6 @@ interface FinanceProps {
 
 const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }) => {
   const t = translations[lang].finance;
-  const [isSmartMode, setIsSmartMode] = useState(true);
-  const [input, setInput] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   
   // Budget State
   const [monthlyBudget, setMonthlyBudget] = useState(5000);
@@ -40,40 +36,16 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
 
   const budgetProgress = Math.min((currentMonthExpenses / monthlyBudget) * 100, 100);
 
-  const handleSmartSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    setIsProcessing(true);
-    const result = await parseSmartTransaction(input, lang);
-    setIsProcessing(false);
-
-    if (result) {
-      const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        amount: result.amount,
-        type: result.type as TransactionType,
-        category: result.category,
-        description: result.description,
-        date: Date.now(),
-      };
-      setTransactions([newTransaction, ...transactions]);
-      setInput('');
-    } else {
-      alert(translations[lang].home.error_ai);
-    }
-  };
-
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !desc) return;
+    if (!amount) return;
 
     const newTransaction: Transaction = {
         id: Date.now().toString(),
         amount: parseFloat(amount),
         type,
         category,
-        description: desc,
+        description: desc || category, // Default description to category name if empty
         date: Date.now(),
     };
     setTransactions([newTransaction, ...transactions]);
@@ -85,8 +57,8 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
     return new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: lang === 'zh' ? 'CNY' : 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
-  const getCategoryIcon = (cat: string) => {
-      const props = { size: 20, className: "text-white" };
+  const getCategoryIcon = (cat: string, size: number = 20) => {
+      const props = { size, className: "text-white" };
       switch(cat) {
           case 'Food': return <div className="bg-orange-400 p-2 rounded-full shadow-md shadow-orange-200"><Utensils {...props} /></div>;
           case 'Transport': return <div className="bg-blue-400 p-2 rounded-full shadow-md shadow-blue-200"><Bus {...props} /></div>;
@@ -103,10 +75,12 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
       return t.categories[cat as keyof typeof t.categories] || cat;
   }
 
+  const categoryList = Object.keys(t.categories);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-24">
       
-      {/* Budget Card - Glassmorphism Blue Gradient */}
+      {/* Budget Card */}
       <div className="relative p-6 rounded-3xl overflow-hidden shadow-xl shadow-blue-900/20 group transition-all hover:shadow-2xl hover:scale-[1.01]">
           {/* Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-sky-800 z-0"></div>
@@ -159,84 +133,95 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
           </div>
       </div>
 
-      {/* Input Section */}
+      {/* Add Transaction Form */}
       <div className="glass-panel p-6 rounded-3xl">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-6">
           <h3 className="font-bold text-slate-700 flex items-center gap-2">
-             <Wand2 size={18} className="text-blue-500"/>
-             {t.record_btn}
+             <PlusCircle size={20} className="text-blue-500"/>
+             {t.add_new}
           </h3>
-          <button
-            onClick={() => setIsSmartMode(!isSmartMode)}
-            className="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-full transition-all active:scale-95"
-          >
-            {isSmartMode ? t.switch_manual : t.switch_smart}
-          </button>
+          
+          {/* Type Toggle */}
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button 
+                onClick={() => setType('expense')}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'expense' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}
+              >
+                  {t.types.expense}
+              </button>
+              <button 
+                onClick={() => setType('income')}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'income' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}
+              >
+                  {t.types.income}
+              </button>
+          </div>
         </div>
 
-        {isSmartMode ? (
-          <form onSubmit={handleSmartSubmit} className="relative">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={t.smart_ph}
-                className="w-full pl-4 pr-24 py-4 rounded-2xl glass-input outline-none transition-all shadow-sm text-slate-700 placeholder:text-slate-400 focus:ring-1 focus:ring-blue-200"
-                disabled={isProcessing}
-              />
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="absolute right-2 bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-900 transition-colors disabled:bg-slate-400 shadow-lg active:scale-95"
-              >
-                {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : t.record_btn}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleManualSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-                 <select 
-                    value={type} 
-                    onChange={(e) => setType(e.target.value as TransactionType)}
-                    className="p-3 glass-input rounded-xl text-sm outline-none text-slate-700"
-                 >
-                     <option value="expense">{t.types.expense}</option>
-                     <option value="income">{t.types.income}</option>
-                 </select>
-                 <input 
+        <form onSubmit={handleManualSubmit} className="space-y-6">
+            {/* Amount Input */}
+            <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">
+                    {lang === 'zh' ? '¥' : '$'}
+                </span>
+                <input 
                     type="number" 
-                    placeholder={t.labels.amount}
+                    placeholder="0.00"
                     value={amount} 
                     onChange={(e) => setAmount(e.target.value)}
-                    className="p-3 glass-input rounded-xl text-sm outline-none text-slate-700"
+                    className="w-full pl-10 pr-4 py-4 bg-white/50 border-2 border-transparent focus:border-blue-200 focus:bg-white rounded-2xl text-3xl font-bold text-slate-800 outline-none transition-all placeholder:text-slate-300"
                     step="0.01"
-                 />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-                <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="p-3 glass-input rounded-xl text-sm outline-none text-slate-700"
-                >
-                    {Object.keys(t.categories).map(key => (
-                        <option key={key} value={key}>{t.categories[key as keyof typeof t.categories]}</option>
-                    ))}
-                </select>
-                <input 
-                    type="text" 
-                    placeholder={t.labels.desc}
-                    value={desc}
-                    onChange={(e) => setDesc(e.target.value)}
-                    className="p-3 glass-input rounded-xl text-sm outline-none text-slate-700"
+                    required
                 />
             </div>
-            <button type="submit" className="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-medium hover:bg-slate-900 shadow-lg transition-all active:scale-[0.98]">
+
+            {/* Category Selection - Dynamic Grid */}
+            <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block px-1">{t.labels.category}</label>
+                <div className="flex flex-wrap gap-3">
+                    {categoryList.map(cat => (
+                        <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setCategory(cat)}
+                            className={`flex items-center gap-2 p-2 pr-4 rounded-full border transition-all duration-200 active:scale-95 ${
+                                category === cat 
+                                ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200 shadow-sm' 
+                                : 'bg-white/40 border-transparent hover:bg-white/80'
+                            }`}
+                        >
+                            <div className={`transform transition-transform duration-200 ${category === cat ? 'scale-110' : 'scale-100'}`}>
+                                {getCategoryIcon(cat, 16)}
+                            </div>
+                            <span className={`text-sm font-medium ${category === cat ? 'text-blue-700' : 'text-slate-600'}`}>
+                                {getCategoryLabel(cat)}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Description Input */}
+            <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block px-1">{t.labels.desc}</label>
+                <input 
+                    type="text" 
+                    placeholder={category ? `${t.categories[category as keyof typeof t.categories]}...` : "..."}
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                    className="w-full p-4 glass-input rounded-2xl text-sm outline-none text-slate-700"
+                />
+            </div>
+
+            <button 
+                type="submit" 
+                disabled={!amount}
+                className="w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-base hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                <Check size={20} />
                 {t.save_btn}
             </button>
-          </form>
-        )}
+        </form>
       </div>
 
       {/* List Section */}

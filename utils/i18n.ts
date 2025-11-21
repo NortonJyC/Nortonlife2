@@ -22,13 +22,14 @@ export const translations = {
       quick_task: '快速添加任务',
       quick_task_ph: '接下来要做什么？',
       quick_finance: '极速记账',
-      quick_finance_ph: '例如：打车花了35元',
+      quick_finance_ph: '备注...',
+      quick_amount_ph: '0.00',
       add: '添加',
-      record: '记录',
-      processing: '分析中...',
+      record: '记一笔',
+      processing: '保存中...',
       saved: '已保存',
-      error_ai: 'AI 无法识别，请尝试更清晰的描述。',
-      record_success: '已记录: ',
+      record_success: '已记录',
+      fill_alert: '请输入金额和备注'
     },
     calendar: {
       month_unit: '月',
@@ -52,13 +53,8 @@ export const translations = {
       spent: '已支出',
       usage_rate: '使用率',
       remaining: '剩余',
-      smart_mode: '智能模式',
-      manual_mode: '手动模式',
-      switch_manual: '切换手动',
-      switch_smart: '切换智能',
-      smart_ph: '例如：超市买菜花了120元...',
-      record_btn: '记录交易',
-      save_btn: '保存交易',
+      add_new: '记一笔',
+      save_btn: '确认保存',
       recent_transactions: '近期交易',
       no_transactions: '还没有交易记录',
       categories: {
@@ -66,7 +62,7 @@ export const translations = {
         Entertainment: '娱乐', Salary: '工资', Investment: '理财', Other: '其他'
       },
       types: { income: '收入', expense: '支出' },
-      labels: { amount: '金额', desc: '备注', category: '分类', type: '类型' }
+      labels: { amount: '金额', desc: '备注说明', category: '选择分类', type: '类型' }
     },
     dashboard: {
       income: '收入',
@@ -102,13 +98,14 @@ export const translations = {
       quick_task: 'Quick Task',
       quick_task_ph: 'What needs to be done?',
       quick_finance: 'Quick Expense',
-      quick_finance_ph: 'e.g., Spent $15 on coffee',
+      quick_finance_ph: 'Note...',
+      quick_amount_ph: '0.00',
       add: 'Add',
-      record: 'Record',
-      processing: 'Thinking...',
+      record: 'Save',
+      processing: 'Saving...',
       saved: 'Saved',
-      error_ai: 'AI could not understand. Please try again.',
-      record_success: 'Recorded: ',
+      record_success: 'Recorded',
+      fill_alert: 'Please enter amount and note'
     },
     calendar: {
       month_unit: '',
@@ -132,13 +129,8 @@ export const translations = {
       spent: 'Spent',
       usage_rate: 'Used',
       remaining: 'Left',
-      smart_mode: 'Smart Mode',
-      manual_mode: 'Manual',
-      switch_manual: 'Manual',
-      switch_smart: 'Smart AI',
-      smart_ph: 'e.g., Grocery shopping cost $50...',
-      record_btn: 'Record',
-      save_btn: 'Save',
+      add_new: 'Add Transaction',
+      save_btn: 'Save Transaction',
       recent_transactions: 'Recent',
       no_transactions: 'No transactions yet',
       categories: {
@@ -146,7 +138,7 @@ export const translations = {
         Entertainment: 'Fun', Salary: 'Salary', Investment: 'Invest', Other: 'Other'
       },
       types: { income: 'Income', expense: 'Expense' },
-      labels: { amount: 'Amount', desc: 'Note', category: 'Category', type: 'Type' }
+      labels: { amount: 'Amount', desc: 'Description', category: 'Category', type: 'Type' }
     },
     dashboard: {
       income: 'Income',

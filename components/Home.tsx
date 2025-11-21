@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Plus, Zap, CheckCircle2, Pencil, Check, X } from 'lucide-react';
+import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight } from 'lucide-react';
 import { Task, Transaction, View, Language, GreetingData } from '../types';
-import { parseSmartTransaction } from '../services/geminiService';
 import { translations } from '../utils/i18n';
 
 interface HomeProps {
@@ -19,8 +18,11 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransactions, setView, lang, greeting, setGreeting }) => {
   const t = translations[lang].home;
   const [quickTask, setQuickTask] = useState('');
-  const [quickFinance, setQuickFinance] = useState('');
-  const [isProcessingFinance, setIsProcessingFinance] = useState(false);
+  
+  // Manual Quick Finance States
+  const [qAmount, setQAmount] = useState('');
+  const [qDesc, setQDesc] = useState('');
+  const [qCategory, setQCategory] = useState('Other');
   
   // Editing State
   const [isEditingGreeting, setIsEditingGreeting] = useState(false);
@@ -47,29 +49,25 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
     setQuickTask('');
   };
 
-  const handleQuickFinance = async (e: React.FormEvent) => {
+  const handleQuickFinance = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quickFinance.trim()) return;
-    
-    setIsProcessingFinance(true);
-    const result = await parseSmartTransaction(quickFinance, lang);
-    setIsProcessingFinance(false);
-
-    if (result) {
-        const newTrans: Transaction = {
-            id: Date.now().toString(),
-            amount: result.amount,
-            type: result.type,
-            category: result.category,
-            description: result.description,
-            date: Date.now(),
-        };
-        setTransactions([newTrans, ...transactions]);
-        setQuickFinance('');
-        alert(`${t.record_success} ${result.description} ¥${result.amount}`);
-    } else {
-        alert(t.error_ai);
+    if (!qAmount || !qDesc) {
+        alert(t.fill_alert);
+        return;
     }
+    
+    const newTrans: Transaction = {
+        id: Date.now().toString(),
+        amount: parseFloat(qAmount),
+        type: 'expense', // Default to expense for quick add
+        category: qCategory,
+        description: qDesc,
+        date: Date.now(),
+    };
+    setTransactions([newTrans, ...transactions]);
+    setQAmount('');
+    setQDesc('');
+    alert(`${t.record_success}: ${qDesc} - ${qAmount}`);
   };
 
   const saveGreeting = () => {
@@ -148,7 +146,7 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
             </form>
         </div>
 
-        {/* Quick Finance Card */}
+        {/* Quick Finance Card (Manual) */}
         <div className="glass-panel p-6 rounded-3xl border-l-4 border-l-sky-500 relative overflow-hidden group transition-all hover:shadow-lg hover:scale-[1.01]">
             <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
                 <Zap size={80} className="text-sky-600"/>
@@ -157,21 +155,40 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                 <Zap className="text-sky-500" size={20}/> {t.quick_finance}
             </h3>
             <form onSubmit={handleQuickFinance} className="flex flex-col gap-3 relative z-10">
-                <input 
-                    type="text" 
-                    value={quickFinance}
-                    onChange={(e) => setQuickFinance(e.target.value)}
-                    placeholder={t.quick_finance_ph}
-                    disabled={isProcessingFinance}
-                    className="glass-input p-4 rounded-2xl w-full outline-none focus:ring-2 focus:ring-sky-200 transition-all"
-                />
-                <div className="flex justify-end">
+                <div className="flex gap-2">
+                    <input 
+                        type="number" 
+                        value={qAmount}
+                        onChange={(e) => setQAmount(e.target.value)}
+                        placeholder={t.quick_amount_ph}
+                        step="0.01"
+                        className="glass-input p-4 rounded-2xl w-1/3 outline-none focus:ring-2 focus:ring-sky-200 transition-all font-mono font-bold"
+                    />
+                    <input 
+                        type="text" 
+                        value={qDesc}
+                        onChange={(e) => setQDesc(e.target.value)}
+                        placeholder={t.quick_finance_ph}
+                        className="glass-input p-4 rounded-2xl w-2/3 outline-none focus:ring-2 focus:ring-sky-200 transition-all"
+                    />
+                </div>
+                
+                <div className="flex justify-between items-center">
+                    <select 
+                        value={qCategory}
+                        onChange={(e) => setQCategory(e.target.value)}
+                        className="text-xs text-slate-500 bg-transparent outline-none cursor-pointer hover:text-sky-600"
+                    >
+                        <option value="Food">Food/Dining</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
                     <button 
                         type="submit" 
-                        disabled={isProcessingFinance}
-                        className="bg-sky-500 text-white px-6 py-2 rounded-xl font-medium hover:bg-sky-600 active:scale-95 transition-all shadow-lg shadow-sky-200 disabled:opacity-70"
+                        className="bg-sky-500 text-white px-6 py-2 rounded-xl font-medium hover:bg-sky-600 active:scale-95 transition-all shadow-lg shadow-sky-200 flex items-center gap-1"
                     >
-                        {isProcessingFinance ? t.processing : t.record}
+                        {t.record} <ArrowRight size={16} />
                     </button>
                 </div>
             </form>
