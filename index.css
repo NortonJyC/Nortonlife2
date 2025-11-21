@@ -85,6 +85,22 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Page Transition Animation */
+@keyframes slideUpFade {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }

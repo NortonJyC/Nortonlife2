@@ -50,7 +50,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, onDateSelect, tasksMap
 
     // Empty slots for previous month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-12 sm:h-16"></div>);
+      days.push(<div key={`empty-${i}`} className="h-10 sm:h-14"></div>);
     }
 
     // Days of current month
@@ -76,7 +76,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, onDateSelect, tasksMap
             newDate.setDate(i);
             handleDateClick(newDate);
           }}
-          className={`h-12 sm:h-16 w-full rounded-2xl flex flex-col items-center justify-center relative transition-all duration-200 border active:scale-95 ${
+          className={`h-10 sm:h-14 w-full rounded-xl flex flex-col items-center justify-center relative transition-all duration-200 border active:scale-95 ${
             isSelected 
               ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200 scale-105 z-10' 
               : isToday 
@@ -84,9 +84,9 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, onDateSelect, tasksMap
                 : 'text-slate-700 bg-white/40 border-transparent hover:bg-white/80 hover:border-white'
           }`}
         >
-          <span className="text-sm sm:text-base">{i}</span>
+          <span className="text-sm">{i}</span>
           {hasTask && !isSelected && (
-            <span className="absolute bottom-2 w-1.5 h-1.5 bg-sky-400 rounded-full"></span>
+            <span className="absolute bottom-1.5 w-1 h-1 bg-sky-400 rounded-full"></span>
           )}
         </button>
       );
@@ -99,41 +99,41 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, onDateSelect, tasksMap
   const selectedDateTasks = tasks.filter(t => t.date === selectedDateKey);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-500">
       {/* Calendar Main View */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl">
-        <div className="flex items-center justify-between mb-8 px-2">
-          <button onClick={() => changeMonth(-1)} className="p-3 hover:bg-white/80 rounded-full text-slate-600 transition-colors bg-white/30 active:scale-95">
-            <ChevronLeft size={20} />
+      <div className="glass-panel p-4 sm:p-6 rounded-3xl">
+        <div className="flex items-center justify-between mb-4 px-2">
+          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white/80 rounded-full text-slate-600 transition-colors bg-white/30 active:scale-95">
+            <ChevronLeft size={18} />
           </button>
-          <span className="font-bold text-slate-800 text-xl tracking-tight">
+          <span className="font-bold text-slate-800 text-lg tracking-tight">
             {viewDate.getFullYear()}{t.year_unit} {viewDate.getMonth() + 1}{t.month_unit}
           </span>
-          <button onClick={() => changeMonth(1)} className="p-3 hover:bg-white/80 rounded-full text-slate-600 transition-colors bg-white/30 active:scale-95">
-            <ChevronRight size={20} />
+          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-white/80 rounded-full text-slate-600 transition-colors bg-white/30 active:scale-95">
+            <ChevronRight size={18} />
           </button>
         </div>
         
-        <div className="grid grid-cols-7 gap-2 mb-4 text-center">
+        <div className="grid grid-cols-7 gap-1 mb-2 text-center">
           {t.weekdays.map(d => (
-            <div key={d} className="text-xs font-bold text-slate-400 uppercase tracking-widest">{d}</div>
+            <div key={d} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{d}</div>
           ))}
         </div>
         
-        <div className="grid grid-cols-7 gap-2 sm:gap-3">
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
           {renderCalendarDays()}
         </div>
       </div>
 
       {/* Selected Day Preview */}
-      <div className="glass-card p-6 rounded-3xl">
-          <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-slate-800 text-lg">
+      <div className="glass-card p-4 rounded-3xl">
+          <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-slate-800 text-base">
                   {selectedDateKey} {t.schedule}
               </h3>
               <button 
                 onClick={() => setView('planner')}
-                className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors active:scale-95"
+                className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition-colors active:scale-95"
               >
                   {t.edit_details}
               </button>
@@ -147,8 +147,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, onDateSelect, tasksMap
                   </div>
               ) : (
                   selectedDateTasks.map(task => (
-                      <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
-                          <div className={`w-3 h-3 rounded-full ${task.completed ? 'bg-slate-300' : 'bg-blue-500'}`}></div>
+                      <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/40 border border-white/40">
+                          <div className={`w-2.5 h-2.5 rounded-full ${task.completed ? 'bg-slate-300' : 'bg-blue-500'}`}></div>
                           <span className={`text-sm text-slate-700 ${task.completed ? 'line-through opacity-60' : ''}`}>
                               {task.text}
                           </span>

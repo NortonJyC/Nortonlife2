@@ -56,6 +56,11 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
   });
 
+  // Budget State Persistence (New)
+  const [budget, setBudget] = useState<string>(() => {
+    return localStorage.getItem('norton_budget') || '5000';
+  });
+
   // Persistence Effects
   useEffect(() => {
     localStorage.setItem('norton_tasks', JSON.stringify(tasks));
@@ -69,12 +74,17 @@ const App: React.FC = () => {
     localStorage.setItem('norton_greeting', JSON.stringify(greeting));
   }, [greeting]);
 
+  useEffect(() => {
+    localStorage.setItem('norton_budget', budget);
+  }, [budget]);
+
   const handleClearData = (type: 'tasks' | 'transactions' | 'all') => {
       if (type === 'tasks' || type === 'all') {
           setTasks([]);
       }
       if (type === 'transactions' || type === 'all') {
           setTransactions([]);
+          setBudget('5000'); // Reset budget on full clear
       }
   };
 
@@ -87,7 +97,7 @@ const App: React.FC = () => {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden text-slate-800 selection:bg-blue-200 font-sans pb-28">
+    <div className="min-h-screen relative overflow-x-hidden text-slate-800 selection:bg-blue-200 font-sans pb-24">
       
       {/* Splash Screen */}
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
@@ -105,7 +115,11 @@ const App: React.FC = () => {
         onClearData={handleClearData}
       />
       
-      <main className={`max-w-3xl mx-auto px-4 py-2 transition-opacity duration-700 ${showSplash ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Main Content with Smooth Transitions */}
+      <main 
+        key={activeView}
+        className={`max-w-3xl mx-auto px-4 py-1 transition-all duration-500 ${showSplash ? 'opacity-0' : 'opacity-100 animate-slide-up'}`}
+      >
         {activeView === 'home' && (
           <Home 
             tasks={tasks} 
@@ -132,7 +146,13 @@ const App: React.FC = () => {
           <Planner tasks={tasks} setTasks={setTasks} selectedDate={selectedDate} lang={lang} />
         )}
         {activeView === 'finance' && (
-          <Finance transactions={transactions} setTransactions={setTransactions} lang={lang} />
+          <Finance 
+            transactions={transactions} 
+            setTransactions={setTransactions} 
+            lang={lang}
+            budget={budget}
+            setBudget={setBudget}
+          />
         )}
         {activeView === 'dashboard' && (
           <Dashboard transactions={transactions} tasks={tasks} lang={lang} />

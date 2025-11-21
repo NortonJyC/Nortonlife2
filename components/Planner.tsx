@@ -106,30 +106,30 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-24">
+    <div className="space-y-4 animate-in fade-in duration-500 pb-20">
       {/* Header Info */}
-      <div className="flex items-end justify-between px-2">
+      <div className="flex items-end justify-between px-2 pt-2">
         <div>
-            <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">{t.daily_plan}</div>
-            <h2 className="text-3xl font-bold text-slate-800 drop-shadow-sm">
+            <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">{t.daily_plan}</div>
+            <h2 className="text-2xl font-bold text-slate-800 drop-shadow-sm">
                 {selectedDateKey}
             </h2>
         </div>
         <div className="text-right">
-             <span className="text-4xl font-bold text-slate-200">{filteredTasks.filter(t => t.completed).length}</span>
-             <span className="text-xl font-medium text-slate-300">/{filteredTasks.length}</span>
+             <span className="text-3xl font-bold text-slate-200">{filteredTasks.filter(t => t.completed).length}</span>
+             <span className="text-lg font-medium text-slate-300">/{filteredTasks.length}</span>
         </div>
       </div>
 
-      {/* AI Tip Section */}
+      {/* AI Tip Section - Compact */}
       {filteredTasks.length > 0 && (
-         <div className="glass-card rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative overflow-hidden group">
+         <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative overflow-hidden group">
              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-sky-400"></div>
-             <div className="flex items-start gap-3 z-10">
-                 <div className="p-2 bg-blue-50 rounded-full shadow-sm">
-                    <Sparkles className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+             <div className="flex items-start gap-2 z-10">
+                 <div className="p-1.5 bg-blue-50 rounded-full shadow-sm">
+                    <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0" />
                  </div>
-                 <p className="text-sm text-slate-700 italic leading-relaxed">
+                 <p className="text-xs sm:text-sm text-slate-700 italic leading-relaxed line-clamp-2">
                     {aiTip || t.get_advice_ph}
                  </p>
              </div>
@@ -137,7 +137,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                  <button 
                     onClick={fetchAiAdvice}
                     disabled={isLoadingAi}
-                    className="z-10 text-xs font-medium bg-white text-blue-600 border border-blue-100 px-4 py-2 rounded-full transition-all hover:shadow-md hover:bg-blue-50 whitespace-nowrap flex-shrink-0 ml-auto active:scale-95"
+                    className="z-10 text-[10px] font-medium bg-white text-blue-600 border border-blue-100 px-3 py-1.5 rounded-full transition-all hover:shadow-md hover:bg-blue-50 whitespace-nowrap flex-shrink-0 ml-auto active:scale-95"
                  >
                     {isLoadingAi ? t.thinking : t.ai_advice}
                  </button>
@@ -145,28 +145,28 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
          </div>
       )}
 
-      {/* Add Task Form */}
-      <form onSubmit={addTask} className="relative flex gap-3">
+      {/* Add Task Form - Compact */}
+      <form onSubmit={addTask} className="relative flex gap-2">
         <div className="relative flex-1 group">
             <input
             type="text"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             placeholder={t.add_placeholder}
-            className="w-full pl-5 pr-14 py-4 rounded-2xl glass-input outline-none transition-all shadow-sm text-slate-700 placeholder:text-slate-400 focus:shadow-blue-100 focus:ring-2 focus:ring-blue-100"
+            className="w-full pl-4 pr-12 py-3 rounded-xl glass-input outline-none transition-all shadow-sm text-slate-700 placeholder:text-slate-400 focus:shadow-blue-100 focus:ring-2 focus:ring-blue-100 text-sm"
             />
             <button
             type="submit"
-            className="absolute right-2 top-2 p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-200"
+            className="absolute right-1.5 top-1.5 p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-200"
             >
-            <Plus size={20} />
+            <Plus size={18} />
             </button>
         </div>
         <div className="flex-shrink-0">
             <select 
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
-                className="h-full px-4 glass-input rounded-2xl text-sm text-slate-700 outline-none font-medium cursor-pointer hover:bg-white/80 transition-colors"
+                className="h-full px-3 glass-input rounded-xl text-xs text-slate-700 outline-none font-medium cursor-pointer hover:bg-white/80 transition-colors"
             >
                 <option value="high">{t.priorities.high}</option>
                 <option value="medium">{t.priorities.medium}</option>
@@ -176,7 +176,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
       </form>
 
       {/* Task List */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {filteredTasks.length === 0 && (
             <div className="text-center py-12 text-slate-400 glass-panel rounded-2xl border-dashed border-2 border-slate-200/50">
                 <p>{t.empty}</p>
@@ -194,7 +194,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
             .map((task) => (
           <div
             key={task.id}
-            className={`group relative p-4 glass-card rounded-2xl transition-all duration-500 ease-out border border-transparent ${
+            className={`group relative p-3 glass-card rounded-2xl transition-all duration-500 ease-out border border-transparent ${
               task.completed 
                 ? 'opacity-50 bg-slate-50/50 grayscale-[0.2]' 
                 : 'hover:shadow-md hover:border-blue-100'
@@ -202,34 +202,34 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
           >
             {editingTaskId === task.id ? (
                 // Edit Mode
-                <div className="flex flex-col gap-3 animate-in fade-in">
+                <div className="flex flex-col gap-2 animate-in fade-in">
                     <input 
                         type="text" 
                         value={editTaskText}
                         onChange={(e) => setEditTaskText(e.target.value)}
-                        className="w-full p-2 rounded-lg bg-white border border-blue-200 outline-none text-slate-800"
+                        className="w-full p-2 rounded-lg bg-white border border-blue-200 outline-none text-slate-800 text-sm"
                         autoFocus
                     />
                     <div className="flex justify-between items-center">
                          <select 
                             value={editPriority}
                             onChange={(e) => setEditPriority(e.target.value as Priority)}
-                            className="text-sm p-1 rounded border border-slate-200 bg-white text-slate-700"
+                            className="text-xs p-1 rounded border border-slate-200 bg-white text-slate-700"
                         >
                             <option value="high">{t.priorities.high}</option>
                             <option value="medium">{t.priorities.medium}</option>
                             <option value="low">{t.priorities.low}</option>
                         </select>
                         <div className="flex gap-2">
-                            <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600"><X size={18}/></button>
-                            <button onClick={saveEdit} className="p-1 text-blue-600 hover:text-blue-700"><Check size={18}/></button>
+                            <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600"><X size={16}/></button>
+                            <button onClick={saveEdit} className="p-1 text-blue-600 hover:text-blue-700"><Check size={16}/></button>
                         </div>
                     </div>
                 </div>
             ) : (
                 // View Mode
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
+                    <div className="flex items-center gap-3 flex-1">
                     <button
                         onClick={() => toggleTask(task.id)}
                         className={`flex-shrink-0 transition-all duration-300 transform active:scale-90 ${
@@ -239,22 +239,22 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                         }`}
                     >
                         {task.completed ? (
-                            <CheckCircle2 size={24} className="animate-in zoom-in duration-300" />
+                            <CheckCircle2 size={22} className="animate-in zoom-in duration-300" />
                         ) : (
-                            <Circle size={24} />
+                            <Circle size={22} />
                         )}
                     </button>
                     
-                    <div className="flex flex-col gap-1 transition-all duration-300">
+                    <div className="flex flex-col gap-0.5 transition-all duration-300">
                         <span
-                            className={`text-slate-700 font-medium text-[15px] transition-all duration-300 ${
+                            className={`text-slate-700 font-medium text-sm transition-all duration-300 ${
                             task.completed ? 'line-through text-slate-400' : ''
                             }`}
                         >
                             {task.text}
                         </span>
                         <div className={`flex items-center gap-2 transition-opacity duration-300 ${task.completed ? 'opacity-50' : 'opacity-100'}`}>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
                                 {getPriorityLabel(task.priority)}
                             </span>
                         </div>
@@ -266,14 +266,14 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                             className="text-slate-400 hover:text-blue-500 p-2 transition-colors"
                             title={tc.edit}
                         >
-                            <Pencil size={18} />
+                            <Pencil size={16} />
                         </button>
                         <button
                             onClick={() => deleteTask(task.id)}
                             className="text-slate-400 hover:text-red-500 p-2 transition-colors"
                             title={tc.delete}
                         >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 </div>
