@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight, DollarSign, Calendar as CalendarIcon, Tag } from 'lucide-react';
+import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight, DollarSign, Calendar as CalendarIcon, Tag, ChevronDown } from 'lucide-react';
 import { Task, Transaction, View, Language, GreetingData, TaskCategory } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -155,7 +155,7 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Quick Task Card */}
+        {/* Quick Task Card - Improved Layout */}
         <div className="glass-panel p-5 rounded-3xl border-l-4 border-l-blue-500 relative overflow-hidden group transition-all hover:shadow-lg hover:scale-[1.01]">
             <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
                 <CheckCircle2 size={60} className="text-blue-600"/>
@@ -163,57 +163,58 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
             <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
                 <Plus className="text-blue-500" size={18}/> {t.quick_task}
             </h3>
-            <form onSubmit={handleQuickTask} className="flex flex-col gap-2 relative z-10">
+            <form onSubmit={handleQuickTask} className="flex flex-col gap-3 relative z-10">
                 <input 
                     type="text" 
                     value={quickTask}
                     onChange={(e) => setQuickTask(e.target.value)}
                     placeholder={t.quick_task_ph}
-                    className="glass-input p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                    className="glass-input p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-blue-200 transition-all text-sm placeholder:text-slate-400"
                 />
                 
-                <div className="flex gap-2">
-                    <div className="relative flex-1">
-                        <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="relative">
+                        <CalendarIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
                         <input 
                             type="date"
                             value={quickTaskDate}
                             onChange={(e) => setQuickTaskDate(e.target.value)}
-                            className="glass-input pl-8 p-2 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-9"
+                            className="glass-input pl-9 pr-2 py-2.5 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-10"
                         />
                     </div>
-                    <div className="relative flex-1">
-                        <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <div className="relative">
+                        <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
                         <select
                             value={quickTaskCategory}
                             onChange={(e) => setQuickTaskCategory(e.target.value as TaskCategory)}
-                            className="glass-input pl-8 p-2 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-9 appearance-none bg-transparent cursor-pointer"
+                            className="glass-input pl-9 pr-8 py-2.5 rounded-xl w-full outline-none text-xs text-slate-600 font-medium h-10 appearance-none bg-transparent cursor-pointer truncate"
                         >
                             {(['work', 'life', 'study', 'health', 'other'] as TaskCategory[]).map(cat => (
                                 <option key={cat} value={cat}>{tp.categories[cat]}</option>
                             ))}
                         </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                 </div>
 
-                <div className="flex justify-end mt-1">
-                    <button 
-                        type="submit" 
-                        className={`px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
-                            isTaskAdded 
-                            ? 'bg-emerald-500 text-white shadow-emerald-200 scale-105' 
-                            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
-                        }`}
-                    >
-                        {isTaskAdded ? (
-                            <>
-                                <Check size={16} className="animate-in zoom-in duration-300"/> {t.saved}
-                            </>
-                        ) : (
-                            t.add
-                        )}
-                    </button>
-                </div>
+                <button 
+                    type="submit" 
+                    className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 mt-1 ${
+                        isTaskAdded 
+                        ? 'bg-emerald-500 text-white shadow-emerald-200' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                    }`}
+                >
+                    {isTaskAdded ? (
+                        <>
+                            <Check size={18} className="animate-in zoom-in duration-300"/> {t.saved}
+                        </>
+                    ) : (
+                        <>
+                            <Plus size={18} /> {t.add}
+                        </>
+                    )}
+                </button>
             </form>
         </div>
 
@@ -225,8 +226,8 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
             <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
                 <Zap className="text-sky-500" size={18}/> {t.quick_finance}
             </h3>
-            <form onSubmit={handleQuickFinance} className="flex flex-col gap-2 relative z-10">
-                <div className="flex gap-2">
+            <form onSubmit={handleQuickFinance} className="flex flex-col gap-3 relative z-10">
+                <div className="flex gap-3">
                     <input 
                         type="number" 
                         value={qAmount}
@@ -244,19 +245,23 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     />
                 </div>
                 
-                <div className="flex justify-between items-center">
-                    <select 
-                        value={qCategory}
-                        onChange={(e) => setQCategory(e.target.value)}
-                        className="text-xs text-slate-500 bg-transparent outline-none cursor-pointer hover:text-sky-600 max-w-[100px]"
-                    >
-                        {Object.entries(tf.categories).map(([key, label]) => (
-                             <option key={key} value={key}>{label}</option>
-                        ))}
-                    </select>
+                <div className="flex justify-between items-center gap-3">
+                    <div className="relative flex-1">
+                        <select 
+                            value={qCategory}
+                            onChange={(e) => setQCategory(e.target.value)}
+                            className="glass-input w-full py-2.5 pl-3 pr-8 rounded-xl text-xs text-slate-500 bg-transparent outline-none cursor-pointer hover:text-sky-600 appearance-none h-10"
+                        >
+                            {Object.entries(tf.categories).map(([key, label]) => (
+                                 <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                    
                     <button 
                         type="submit" 
-                        className={`px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
+                        className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
                             isFinanceAdded 
                             ? 'bg-emerald-500 text-white shadow-emerald-200 scale-105' 
                             : 'bg-sky-500 text-white hover:bg-sky-600 shadow-sky-200'
@@ -264,11 +269,11 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     >
                          {isFinanceAdded ? (
                             <>
-                                <Check size={16} className="animate-in zoom-in duration-300"/> {t.saved}
+                                <Check size={18} className="animate-in zoom-in duration-300"/> {t.saved}
                             </>
                         ) : (
                             <>
-                                {t.record} <ArrowRight size={14} />
+                                {t.record} <ArrowRight size={16} />
                             </>
                         )}
                     </button>
