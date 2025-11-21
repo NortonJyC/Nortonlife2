@@ -4,9 +4,16 @@ import { Language } from '../types';
 export const translations = {
   zh: {
     nav: { home: '首页', calendar: '日历', planner: '计划', finance: '记账', dashboard: '报表' },
+    common: {
+      edit: '编辑',
+      delete: '删除',
+      update: '更新',
+      cancel: '取消',
+      refresh: '刷新页面',
+      save: '保存'
+    },
     settings: {
       title: '设置',
-      github: '项目源码',
       clear_data: '数据管理',
       clear_tasks: '清空所有任务',
       clear_finance: '清空所有账目',
@@ -47,7 +54,8 @@ export const translations = {
       ai_advice: 'AI 建议',
       get_advice_ph: '获取今日 AI 规划建议...',
       empty: '当日暂无安排',
-      priorities: { high: '重要', medium: '普通', low: '日常' }
+      priorities: { high: '重要', medium: '普通', low: '日常' },
+      edit_task: '编辑任务'
     },
     finance: {
       budget_title: '本月预算',
@@ -55,7 +63,9 @@ export const translations = {
       usage_rate: '使用率',
       remaining: '剩余',
       add_new: '记一笔',
+      update_transaction: '更新交易',
       save_btn: '确认保存',
+      update_btn: '确认修改',
       recent_transactions: '近期交易',
       no_transactions: '还没有交易记录',
       categories: {
@@ -81,9 +91,16 @@ export const translations = {
   },
   en: {
     nav: { home: 'Home', calendar: 'Calendar', planner: 'Planner', finance: 'Finance', dashboard: 'Stats' },
+    common: {
+      edit: 'Edit',
+      delete: 'Delete',
+      update: 'Update',
+      cancel: 'Cancel',
+      refresh: 'Refresh App',
+      save: 'Save'
+    },
     settings: {
       title: 'Settings',
-      github: 'GitHub Repo',
       clear_data: 'Data Management',
       clear_tasks: 'Clear All Tasks',
       clear_finance: 'Clear All Transactions',
@@ -124,7 +141,8 @@ export const translations = {
       ai_advice: 'AI Tips',
       get_advice_ph: 'Get AI planning advice...',
       empty: 'No tasks for today',
-      priorities: { high: 'High', medium: 'Medium', low: 'Low' }
+      priorities: { high: 'High', medium: 'Medium', low: 'Low' },
+      edit_task: 'Edit Task'
     },
     finance: {
       budget_title: 'Monthly Budget',
@@ -132,7 +150,9 @@ export const translations = {
       usage_rate: 'Used',
       remaining: 'Left',
       add_new: 'Add Transaction',
+      update_transaction: 'Update Transaction',
       save_btn: 'Save Transaction',
+      update_btn: 'Update Transaction',
       recent_transactions: 'Recent',
       no_transactions: 'No transactions yet',
       categories: {

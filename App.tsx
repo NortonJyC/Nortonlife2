@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Header from './components/Header';
+import BottomNav from './components/BottomNav';
 import Planner from './components/Planner';
 import Finance from './components/Finance';
 import Dashboard from './components/Dashboard';
@@ -73,13 +74,6 @@ const App: React.FC = () => {
       if (type === 'transactions' || type === 'all') {
           setTransactions([]);
       }
-      // If all, we can also reset greeting if we wanted, but let's keep it personalized.
-      if (type === 'all') {
-          // Optional: Restore defaults if user prefers, but usually "clear" means empty.
-          // Uncomment below to reset to factory demo data instead of empty
-          // setTasks(INITIAL_TASKS);
-          // setTransactions(INITIAL_TRANSACTIONS);
-      }
   };
 
   const tasksMap = useMemo(() => {
@@ -91,7 +85,7 @@ const App: React.FC = () => {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden pb-20 text-slate-800 selection:bg-blue-200 font-sans">
+    <div className="min-h-screen relative overflow-x-hidden text-slate-800 selection:bg-blue-200 font-sans pb-28">
       {/* Decorative Background Blobs - Blue Theme */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-200/30 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-pulse"></div>
@@ -100,14 +94,12 @@ const App: React.FC = () => {
       </div>
 
       <Header 
-        activeView={activeView} 
-        setView={setActiveView} 
         lang={lang} 
         setLang={setLang} 
         onClearData={handleClearData}
       />
       
-      <main className="max-w-3xl mx-auto px-4 py-8">
+      <main className="max-w-3xl mx-auto px-4 py-2">
         {activeView === 'home' && (
           <Home 
             tasks={tasks} 
@@ -140,6 +132,12 @@ const App: React.FC = () => {
           <Dashboard transactions={transactions} tasks={tasks} lang={lang} />
         )}
       </main>
+
+      <BottomNav 
+        activeView={activeView}
+        setView={setActiveView}
+        lang={lang}
+      />
     </div>
   );
 };

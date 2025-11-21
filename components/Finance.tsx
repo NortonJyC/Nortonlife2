@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank, Check, PlusCircle } from 'lucide-react';
+import { Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank, Check, PlusCircle, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import { Transaction, TransactionType, Language } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -12,18 +12,23 @@ interface FinanceProps {
 
 const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }) => {
   const t = translations[lang].finance;
+  const tc = translations[lang].common;
   
-  // Budget State
-  const [monthlyBudget, setMonthlyBudget] = useState(5000);
+  // Budget State - use string to avoid "0" issues
+  const [monthlyBudgetStr, setMonthlyBudgetStr] = useState('5000'); 
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
-  // Manual Form States
-  const [amount, setAmount] = useState('');
+  // Manual Form States - Amount is string
+  const [amountStr, setAmountStr] = useState('');
   const [type, setType] = useState<TransactionType>('expense');
   const [category, setCategory] = useState('Food');
   const [desc, setDesc] = useState('');
 
+  // Editing Transaction State
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   // Calculations
+  const monthlyBudget = parseFloat(monthlyBudgetStr) || 0;
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   
@@ -34,23 +39,62 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const budgetProgress = Math.min((currentMonthExpenses / monthlyBudget) * 100, 100);
+  const budgetProgress = monthlyBudget > 0 ? Math.min((currentMonthExpenses / monthlyBudget) * 100, 100) : 100;
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount) return;
+    const val = parseFloat(amountStr);
+    if (!val) return;
 
-    const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        amount: parseFloat(amount),
-        type,
-        category,
-        description: desc || category, // Default description to category name if empty
-        date: Date.now(),
-    };
-    setTransactions([newTransaction, ...transactions]);
-    setAmount('');
+    if (editingId) {
+        // Update existing
+        setTransactions(transactions.map(t => t.id === editingId ? {
+            ...t,
+            amount: val,
+            type,
+            category,
+            description: desc || category
+        } : t));
+        setEditingId(null);
+    } else {
+        // Create new
+        const newTransaction: Transaction = {
+            id: Date.now().toString(),
+            amount: val,
+            type,
+            category,
+            description: desc || category, // Default description to category name if empty
+            date: Date.now(),
+        };
+        setTransactions([newTransaction, ...transactions]);
+    }
+    
+    // Reset form
+    setAmountStr('');
     setDesc('');
+    setEditingId(null);
+  };
+
+  const startEdit = (t: Transaction) => {
+      setEditingId(t.id);
+      setAmountStr(t.amount.toString());
+      setType(t.type);
+      setCategory(t.category);
+      setDesc(t.description);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+      setEditingId(null);
+      setAmountStr('');
+      setDesc('');
+  };
+
+  const deleteTransaction = (id: string) => {
+      if(window.confirm(t.recent_transactions + ": " + tc.delete + "?")) {
+          setTransactions(transactions.filter(t => t.id !== id));
+          if (editingId === id) cancelEdit();
+      }
   };
 
   const formatMoney = (amount: number) => {
@@ -78,7 +122,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
   const categoryList = Object.keys(t.categories);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-24">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-32">
       
       {/* Budget Card */}
       <div className="relative p-6 rounded-3xl overflow-hidden shadow-xl shadow-blue-900/20 group transition-all hover:shadow-2xl hover:scale-[1.01]">
@@ -97,8 +141,8 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
                     {isEditingBudget ? (
                         <input 
                             type="number" 
-                            value={monthlyBudget}
-                            onChange={(e) => setMonthlyBudget(Number(e.target.value))}
+                            value={monthlyBudgetStr}
+                            onChange={(e) => setMonthlyBudgetStr(e.target.value)}
                             onBlur={() => setIsEditingBudget(false)}
                             autoFocus
                             className="text-3xl font-bold bg-transparent border-b border-blue-400 focus:border-white outline-none w-40"
@@ -133,29 +177,37 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
           </div>
       </div>
 
-      {/* Add Transaction Form */}
-      <div className="glass-panel p-6 rounded-3xl">
+      {/* Add/Edit Transaction Form */}
+      <div className={`glass-panel p-6 rounded-3xl transition-all ${editingId ? 'ring-2 ring-blue-400 bg-white/90' : ''}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-bold text-slate-700 flex items-center gap-2">
-             <PlusCircle size={20} className="text-blue-500"/>
-             {t.add_new}
+             {editingId ? <Pencil size={20} className="text-blue-500"/> : <PlusCircle size={20} className="text-blue-500"/>}
+             {editingId ? t.update_transaction : t.add_new}
           </h3>
           
+          {editingId && (
+              <button onClick={cancelEdit} className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full hover:bg-slate-200">
+                  {tc.cancel}
+              </button>
+          )}
+
           {/* Type Toggle */}
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-              <button 
-                onClick={() => setType('expense')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'expense' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}
-              >
-                  {t.types.expense}
-              </button>
-              <button 
-                onClick={() => setType('income')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'income' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}
-              >
-                  {t.types.income}
-              </button>
-          </div>
+          {!editingId && (
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+                <button 
+                    onClick={() => setType('expense')}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'expense' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}
+                >
+                    {t.types.expense}
+                </button>
+                <button 
+                    onClick={() => setType('income')}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${type === 'income' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}
+                >
+                    {t.types.income}
+                </button>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleManualSubmit} className="space-y-6">
@@ -167,8 +219,8 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
                 <input 
                     type="number" 
                     placeholder="0.00"
-                    value={amount} 
-                    onChange={(e) => setAmount(e.target.value)}
+                    value={amountStr} 
+                    onChange={(e) => setAmountStr(e.target.value)}
                     className="w-full pl-10 pr-4 py-4 bg-white/50 border-2 border-transparent focus:border-blue-200 focus:bg-white rounded-2xl text-3xl font-bold text-slate-800 outline-none transition-all placeholder:text-slate-300"
                     step="0.01"
                     required
@@ -215,11 +267,11 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
 
             <button 
                 type="submit" 
-                disabled={!amount}
-                className="w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-base hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={!amountStr}
+                className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${editingId ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200' : 'bg-slate-800 text-white hover:bg-slate-900 shadow-slate-200'}`}
             >
-                <Check size={20} />
-                {t.save_btn}
+                {editingId ? <RotateCcw size={20}/> : <Check size={20} />}
+                {editingId ? t.update_btn : t.save_btn}
             </button>
         </form>
       </div>
@@ -235,7 +287,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
         {transactions.slice(0, 20).map((t) => (
           <div
             key={t.id}
-            className="flex items-center justify-between p-4 glass-card rounded-2xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100 hover:scale-[1.01]"
+            className={`flex items-center justify-between p-4 glass-card rounded-2xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100 hover:scale-[1.01] group ${editingId === t.id ? 'ring-2 ring-blue-200 bg-blue-50' : ''}`}
           >
             <div className="flex items-center gap-4">
               <div className="flex-shrink-0">
@@ -246,9 +298,27 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang }
                 <p className="text-xs text-slate-500 mt-0.5 font-medium">{getCategoryLabel(t.category)} • {new Date(t.date).toLocaleDateString()}</p>
               </div>
             </div>
-            <span className={`font-bold font-mono text-lg ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}`}>
-              {t.type === 'income' ? '+' : '-'}{Math.abs(t.amount).toFixed(2)}
-            </span>
+            <div className="flex items-center gap-4">
+                <span className={`font-bold font-mono text-lg ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}`}>
+                {t.type === 'income' ? '+' : '-'}{Math.abs(t.amount).toFixed(2)}
+                </span>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:flex-row">
+                     <button 
+                        onClick={() => startEdit(t)}
+                        className="p-1.5 bg-white rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors shadow-sm"
+                     >
+                         <Pencil size={14} />
+                     </button>
+                     <button 
+                        onClick={() => deleteTransaction(t.id)}
+                        className="p-1.5 bg-white rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+                     >
+                         <Trash2 size={14} />
+                     </button>
+                </div>
+            </div>
           </div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, CheckCircle2, Circle, Trash2, Sparkles } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, Trash2, Sparkles, Pencil, X, Check } from 'lucide-react';
 import { Task, Priority, Language } from '../types';
 import { getPlanningAssistant } from '../services/geminiService';
 import { translations } from '../utils/i18n';
@@ -14,11 +14,18 @@ interface PlannerProps {
 
 const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }) => {
   const t = translations[lang].planner;
+  const tc = translations[lang].common;
+
   // State
   const [newTask, setNewTask] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
   const [aiTip, setAiTip] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+
+  // Editing State
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTaskText, setEditTaskText] = useState('');
+  const [editPriority, setEditPriority] = useState<Priority>('medium');
 
   // Helpers
   const formatDateKey = (date: Date) => {
@@ -57,6 +64,25 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
 
   const deleteTask = (id: string) => {
     setTasks(tasks.filter(t => t.id !== id));
+    if (editingTaskId === id) cancelEdit();
+  };
+
+  const startEdit = (task: Task) => {
+      setEditingTaskId(task.id);
+      setEditTaskText(task.text);
+      setEditPriority(task.priority);
+  };
+
+  const cancelEdit = () => {
+      setEditingTaskId(null);
+      setEditTaskText('');
+  };
+
+  const saveEdit = () => {
+      if (editingTaskId && editTaskText.trim()) {
+          setTasks(tasks.map(t => t.id === editingTaskId ? { ...t, text: editTaskText, priority: editPriority } : t));
+          cancelEdit();
+      }
   };
 
   const fetchAiAdvice = async () => {
@@ -95,7 +121,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
         </div>
       </div>
 
-      {/* AI Tip Section - Stylized */}
+      {/* AI Tip Section */}
       {filteredTasks.length > 0 && (
          <div className="glass-card rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative overflow-hidden group">
              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-sky-400"></div>
@@ -168,49 +194,90 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
             .map((task) => (
           <div
             key={task.id}
-            className={`group flex items-center justify-between p-4 glass-card rounded-2xl transition-all duration-500 ease-out hover:scale-[1.01] border border-transparent hover:border-blue-100 ${
+            className={`group relative p-4 glass-card rounded-2xl transition-all duration-500 ease-out border border-transparent ${
               task.completed 
-                ? 'opacity-50 bg-slate-50/50 scale-[0.98] grayscale-[0.2]' 
-                : 'hover:shadow-md scale-100'
+                ? 'opacity-50 bg-slate-50/50 grayscale-[0.2]' 
+                : 'hover:shadow-md hover:border-blue-100'
             }`}
           >
-            <div className="flex items-center gap-4 flex-1">
-              <button
-                onClick={() => toggleTask(task.id)}
-                className={`flex-shrink-0 transition-all duration-300 transform active:scale-90 ${
-                  task.completed 
-                    ? 'text-emerald-500 scale-110' 
-                    : 'text-slate-300 hover:text-blue-500 hover:scale-110'
-                }`}
-              >
-                {task.completed ? (
-                    <CheckCircle2 size={24} className="animate-in zoom-in duration-300" />
-                ) : (
-                    <Circle size={24} />
-                )}
-              </button>
-              
-              <div className="flex flex-col gap-1 transition-all duration-300">
-                  <span
-                    className={`text-slate-700 font-medium text-[15px] transition-all duration-300 ${
-                      task.completed ? 'line-through text-slate-400' : ''
-                    }`}
-                  >
-                    {task.text}
-                  </span>
-                  <div className={`flex items-center gap-2 transition-opacity duration-300 ${task.completed ? 'opacity-50' : 'opacity-100'}`}>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
-                          {getPriorityLabel(task.priority)}
-                      </span>
-                  </div>
-              </div>
-            </div>
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2"
-            >
-              <Trash2 size={18} />
-            </button>
+            {editingTaskId === task.id ? (
+                // Edit Mode
+                <div className="flex flex-col gap-3 animate-in fade-in">
+                    <input 
+                        type="text" 
+                        value={editTaskText}
+                        onChange={(e) => setEditTaskText(e.target.value)}
+                        className="w-full p-2 rounded-lg bg-white border border-blue-200 outline-none text-slate-800"
+                        autoFocus
+                    />
+                    <div className="flex justify-between items-center">
+                         <select 
+                            value={editPriority}
+                            onChange={(e) => setEditPriority(e.target.value as Priority)}
+                            className="text-sm p-1 rounded border border-slate-200 bg-white text-slate-700"
+                        >
+                            <option value="high">{t.priorities.high}</option>
+                            <option value="medium">{t.priorities.medium}</option>
+                            <option value="low">{t.priorities.low}</option>
+                        </select>
+                        <div className="flex gap-2">
+                            <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600"><X size={18}/></button>
+                            <button onClick={saveEdit} className="p-1 text-blue-600 hover:text-blue-700"><Check size={18}/></button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                // View Mode
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                    <button
+                        onClick={() => toggleTask(task.id)}
+                        className={`flex-shrink-0 transition-all duration-300 transform active:scale-90 ${
+                        task.completed 
+                            ? 'text-emerald-500 scale-110' 
+                            : 'text-slate-300 hover:text-blue-500 hover:scale-110'
+                        }`}
+                    >
+                        {task.completed ? (
+                            <CheckCircle2 size={24} className="animate-in zoom-in duration-300" />
+                        ) : (
+                            <Circle size={24} />
+                        )}
+                    </button>
+                    
+                    <div className="flex flex-col gap-1 transition-all duration-300">
+                        <span
+                            className={`text-slate-700 font-medium text-[15px] transition-all duration-300 ${
+                            task.completed ? 'line-through text-slate-400' : ''
+                            }`}
+                        >
+                            {task.text}
+                        </span>
+                        <div className={`flex items-center gap-2 transition-opacity duration-300 ${task.completed ? 'opacity-50' : 'opacity-100'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
+                                {getPriorityLabel(task.priority)}
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            onClick={() => startEdit(task)}
+                            className="text-slate-400 hover:text-blue-500 p-2 transition-colors"
+                            title={tc.edit}
+                        >
+                            <Pencil size={18} />
+                        </button>
+                        <button
+                            onClick={() => deleteTask(task.id)}
+                            className="text-slate-400 hover:text-red-500 p-2 transition-colors"
+                            title={tc.delete}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                </div>
+            )}
           </div>
         ))}
       </div>
