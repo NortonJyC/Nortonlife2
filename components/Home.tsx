@@ -87,7 +87,15 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 relative">
+        
+      {/* Fly Animation Element */}
+      {isTaskAdded && (
+        <div className="animate-fly-down flex items-center justify-center bg-blue-600 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/2 -translate-x-1/2 top-48 z-50">
+            <Check size={20} />
+        </div>
+      )}
+
       {/* Editable Greeting Section - Compact */}
       <div className="text-center py-4 sm:py-6 relative group">
          {isEditingGreeting ? (

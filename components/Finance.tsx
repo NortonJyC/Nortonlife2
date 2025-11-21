@@ -10,9 +10,10 @@ interface FinanceProps {
   lang: Language;
   budget: string;
   setBudget: React.Dispatch<React.SetStateAction<string>>;
+  privacyMode: boolean;
 }
 
-const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, budget, setBudget }) => {
+const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, budget, setBudget, privacyMode }) => {
   const t = translations[lang].finance;
   const tc = translations[lang].common;
   
@@ -100,6 +101,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
   };
 
   const formatMoney = (amount: number) => {
+    if (privacyMode) return '****';
     return new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: lang === 'zh' ? 'CNY' : 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
@@ -325,7 +327,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
             </div>
             <div className="flex items-center gap-3">
                 <span className={`font-bold font-mono text-base ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-500'}`}>
-                {t.type === 'income' ? '+' : '-'}{Math.abs(t.amount).toFixed(2)}
+                {t.type === 'income' ? '+' : '-'}{privacyMode ? '****' : Math.abs(t.amount).toFixed(2)}
                 </span>
                 
                 {/* Action Buttons */}

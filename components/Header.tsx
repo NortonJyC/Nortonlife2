@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings, Globe, Trash2, X, RotateCcw, AlertTriangle, HardDrive } from 'lucide-react';
+import { Settings, Globe, Trash2, X, RotateCcw, AlertTriangle, HardDrive, Eye, EyeOff } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -8,9 +8,11 @@ interface HeaderProps {
   lang: Language;
   setLang: (lang: Language) => void;
   onClearData: (type: 'tasks' | 'transactions' | 'all') => void;
+  privacyMode: boolean;
+  setPrivacyMode: (mode: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ lang, setLang, onClearData }) => {
+const Header: React.FC<HeaderProps> = ({ lang, setLang, onClearData, privacyMode, setPrivacyMode }) => {
   const t = translations[lang].settings;
   const tc = translations[lang].common;
   const [showSettings, setShowSettings] = useState(false);
@@ -43,6 +45,14 @@ const Header: React.FC<HeaderProps> = ({ lang, setLang, onClearData }) => {
           
           {/* Action Buttons */}
           <div className="flex items-center gap-1 sm:gap-2">
+            <button 
+                onClick={() => setPrivacyMode(!privacyMode)}
+                className="p-2 rounded-full hover:bg-white/60 active:scale-95 transition-all text-slate-600 border border-transparent hover:border-white/60"
+                title={privacyMode ? "Show values" : "Hide values"}
+            >
+                {privacyMode ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+
             <button 
                 onClick={handleRefresh}
                 className="p-2 rounded-full hover:bg-white/60 active:scale-95 transition-all text-slate-600 border border-transparent hover:border-white/60"
@@ -133,7 +143,7 @@ const Header: React.FC<HeaderProps> = ({ lang, setLang, onClearData }) => {
                   </div>
                   
                   <div className="bg-slate-50 p-3 text-center">
-                      <p className="text-[10px] text-slate-400 font-medium">NortonLife v1.2.0</p>
+                      <p className="text-[10px] text-slate-400 font-medium">NortonLife v3.0</p>
                   </div>
               </div>
           </div>

@@ -14,8 +14,16 @@ import { translations } from './utils/i18n';
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeView, setActiveView] = useState<View>('home');
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [lang, setLang] = useState<Language>('zh'); // Default to Chinese
+  
+  // Privacy Mode State (Default to true if not set, for safety)
+  const [privacyMode, setPrivacyMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('norton_privacy');
+    return saved !== null ? saved === 'true' : true; 
+  });
+
   const [greeting, setGreeting] = useState<GreetingData>(() => {
     const saved = localStorage.getItem('norton_greeting');
     return saved ? JSON.parse(saved) : { emoji: '☀️', text: '早安, 开始高效的一天。' };
@@ -61,7 +69,7 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
   });
 
-  // Budget State Persistence (New)
+  // Budget State Persistence
   const [budget, setBudget] = useState<string>(() => {
     return localStorage.getItem('norton_budget') || '5000';
   });
@@ -82,6 +90,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('norton_budget', budget);
   }, [budget]);
+  
+  useEffect(() => {
+    localStorage.setItem('norton_privacy', String(privacyMode));
+  }, [privacyMode]);
 
   const handleClearData = (type: 'tasks' | 'transactions' | 'all') => {
       if (type === 'tasks' || type === 'all') {
@@ -91,6 +103,16 @@ const App: React.FC = () => {
           setTransactions([]);
           setBudget('5000'); // Reset budget on full clear
       }
+  };
+
+  // Custom view switcher to handle direction
+  const handleViewChange = (newView: View) => {
+    const currentIndex = viewOrder.indexOf(activeView);
+    const newIndex = viewOrder.indexOf(newView);
+    // If moving to a later view (higher index), slide in from Right.
+    // If moving to an earlier view (lower index), slide in from Left.
+    setSlideDirection(newIndex > currentIndex ? 'right' : 'left');
+    setActiveView(newView);
   };
 
   const tasksMap = useMemo(() => {
@@ -121,11 +143,11 @@ const App: React.FC = () => {
     const currentIndex = viewOrder.indexOf(activeView);
     
     if (isLeftSwipe && currentIndex < viewOrder.length - 1) {
-        setActiveView(viewOrder[currentIndex + 1]);
+        handleViewChange(viewOrder[currentIndex + 1]);
     }
     
     if (isRightSwipe && currentIndex > 0) {
-        setActiveView(viewOrder[currentIndex - 1]);
+        handleViewChange(viewOrder[currentIndex - 1]);
     }
   };
 
@@ -146,12 +168,14 @@ const App: React.FC = () => {
         lang={lang} 
         setLang={setLang} 
         onClearData={handleClearData}
+        privacyMode={privacyMode}
+        setPrivacyMode={setPrivacyMode}
       />
       
-      {/* Main Content with Smooth Transitions and Swipe Support */}
+      {/* Main Content with Directional Slide Animation */}
       <main 
         key={activeView}
-        className={`max-w-3xl mx-auto px-4 py-1 transition-all duration-500 ${showSplash ? 'opacity-0' : 'opacity-100 animate-slide-up'}`}
+        className={`max-w-3xl mx-auto px-4 py-1 ${showSplash ? 'opacity-0' : slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}`}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -162,7 +186,7 @@ const App: React.FC = () => {
             setTasks={setTasks} 
             transactions={transactions} 
             setTransactions={setTransactions} 
-            setView={setActiveView}
+            setView={handleViewChange}
             lang={lang}
             greeting={greeting}
             setGreeting={setGreeting}
@@ -174,7 +198,7 @@ const App: React.FC = () => {
             onDateSelect={setSelectedDate} 
             tasksMap={tasksMap}
             tasks={tasks}
-            setView={setActiveView}
+            setView={handleViewChange}
             lang={lang}
           />
         )}
@@ -188,16 +212,22 @@ const App: React.FC = () => {
             lang={lang}
             budget={budget}
             setBudget={setBudget}
+            privacyMode={privacyMode}
           />
         )}
         {activeView === 'dashboard' && (
-          <Dashboard transactions={transactions} tasks={tasks} lang={lang} />
+          <Dashboard 
+            transactions={transactions} 
+            tasks={tasks} 
+            lang={lang} 
+            privacyMode={privacyMode}
+          />
         )}
       </main>
 
       <BottomNav 
         activeView={activeView}
-        setView={setActiveView}
+        setView={handleViewChange}
         lang={lang}
       />
     </div>

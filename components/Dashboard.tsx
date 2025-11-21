@@ -10,9 +10,10 @@ interface DashboardProps {
   transactions: Transaction[];
   tasks: Task[];
   lang: Language;
+  privacyMode: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
+const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang, privacyMode }) => {
   const t = translations[lang].dashboard;
   const [aiAdvice, setAiAdvice] = useState<string>("");
   const [loadingAdvice, setLoadingAdvice] = useState(false);
@@ -43,16 +44,17 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
   const COLORS = ['#3b82f6', '#0ea5e9', '#6366f1', '#8b5cf6', '#10b981', '#f43f5e'];
 
   useEffect(() => {
-    if (transactions.length > 0) {
+    if (transactions.length > 0 && !privacyMode) {
       setLoadingAdvice(true);
       getFinancialAdvice(transactions, lang).then(advice => {
         setAiAdvice(advice);
         setLoadingAdvice(false);
       });
     }
-  }, [transactions, lang]);
+  }, [transactions, lang, privacyMode]);
 
   const formatMoney = (amount: number) => {
+    if (privacyMode) return '****';
     return new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: lang === 'zh' ? 'CNY' : 'USD' }).format(amount);
   };
 
@@ -88,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
          <div className="flex-1">
              <h4 className="text-sm font-bold text-blue-800 mb-1">{t.ai_insight}</h4>
              <p className="text-sm text-slate-600 leading-relaxed">
-                {loadingAdvice ? t.analyzing : (aiAdvice || t.no_data)}
+                {privacyMode ? (lang === 'zh' ? "隐私模式已开启" : "Privacy mode enabled") : (loadingAdvice ? t.analyzing : (aiAdvice || t.no_data))}
              </p>
          </div>
       </div>
@@ -101,7 +103,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
              <Wallet size={20} className="text-blue-500" /> {t.expense_structure}
           </h3>
           <div className="h-64 w-full">
-             {pieData.length > 0 ? (
+             {pieData.length > 0 && !privacyMode ? (
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
@@ -128,7 +130,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
              ) : (
                  <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm gap-2">
                      <AlertCircle className="opacity-50" />
-                     {t.no_data}
+                     {privacyMode ? (lang === 'zh' ? '数据已隐藏' : 'Data Hidden') : t.no_data}
                  </div>
              )}
           </div>
@@ -140,6 +142,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
              <TrendingUp size={20} className="text-emerald-500" /> {t.income_vs_expense}
           </h3>
           <div className="h-64 w-full">
+            {!privacyMode ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData} barSize={40}>
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} hide />
@@ -154,6 +157,12 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, tasks, lang }) => {
                 <Bar dataKey="Expense" name={t.expense} fill="#f43f5e" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            ) : (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm gap-2">
+                     <AlertCircle className="opacity-50" />
+                     {lang === 'zh' ? '数据已隐藏' : 'Data Hidden'}
+                 </div>
+            )}
           </div>
         </div>
       </div>

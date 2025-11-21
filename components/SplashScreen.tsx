@@ -43,6 +43,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                     Norton
                 </span>
             </h1>
+            <span className="mt-2 text-xs font-bold text-slate-400 tracking-widest opacity-60">v3.0</span>
         </div>
       </div>
     </div>
