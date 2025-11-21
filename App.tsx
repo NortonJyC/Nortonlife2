@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [lang, setLang] = useState<Language>('zh'); // Default to Chinese
   
-  // Privacy Mode State (Default to true if not set, for safety)
+  // Privacy Mode State
   const [privacyMode, setPrivacyMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('norton_privacy');
     return saved !== null ? saved === 'true' : true; 
@@ -32,6 +32,7 @@ const App: React.FC = () => {
   // Swipe Logic State
   const touchStartRef = useRef<number | null>(null);
   const touchEndRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null); // Track Y to detect scroll vs swipe
   const viewOrder: View[] = ['home', 'calendar', 'planner', 'finance', 'dashboard'];
 
   // Helper for date strings
@@ -44,10 +45,10 @@ const App: React.FC = () => {
 
   // DUMMY DATA CONSTANTS
   const INITIAL_TASKS: Task[] = [
-    { id: '1', text: '完成项目报告', completed: false, period: 'day', priority: 'high', date: todayStr, createdAt: Date.now() },
-    { id: '2', text: '健身房锻炼', completed: true, period: 'day', priority: 'medium', date: todayStr, createdAt: Date.now() - 10000 },
-    { id: '3', text: '超市采购', completed: false, period: 'day', priority: 'low', date: yesterdayStr, createdAt: Date.now() },
-    { id: '4', text: '准备周会材料', completed: false, period: 'week', priority: 'high', date: todayStr, createdAt: Date.now() },
+    { id: '1', text: '完成项目报告', completed: false, period: 'day', priority: 'high', category: 'work', date: todayStr, createdAt: Date.now() },
+    { id: '2', text: '健身房锻炼', completed: true, period: 'day', priority: 'medium', category: 'health', date: todayStr, createdAt: Date.now() - 10000 },
+    { id: '3', text: '超市采购', completed: false, period: 'day', priority: 'low', category: 'life', date: yesterdayStr, createdAt: Date.now() },
+    { id: '4', text: '准备周会材料', completed: false, period: 'week', priority: 'high', category: 'work', date: todayStr, createdAt: Date.now() },
   ];
 
   const INITIAL_TRANSACTIONS: Transaction[] = [
@@ -109,8 +110,6 @@ const App: React.FC = () => {
   const handleViewChange = (newView: View) => {
     const currentIndex = viewOrder.indexOf(activeView);
     const newIndex = viewOrder.indexOf(newView);
-    // If moving to a later view (higher index), slide in from Right.
-    // If moving to an earlier view (lower index), slide in from Left.
     setSlideDirection(newIndex > currentIndex ? 'right' : 'left');
     setActiveView(newView);
   };
@@ -123,22 +122,30 @@ const App: React.FC = () => {
     return map;
   }, [tasks]);
 
-  // Swipe Handlers
+  // Swipe Handlers with Slope Check
   const onTouchStart = (e: React.TouchEvent) => {
     touchEndRef.current = null; 
     touchStartRef.current = e.targetTouches[0].clientX;
+    touchStartYRef.current = e.targetTouches[0].clientY;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
     touchEndRef.current = e.targetTouches[0].clientX;
   };
 
-  const onTouchEnd = () => {
-    if (!touchStartRef.current || !touchEndRef.current) return;
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || !touchEndRef.current || !touchStartYRef.current) return;
     
-    const distance = touchStartRef.current - touchEndRef.current;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const touchEndY = e.changedTouches[0].clientY;
+    const distanceX = touchStartRef.current - touchEndRef.current;
+    const distanceY = touchStartYRef.current - touchEndY;
+
+    // SLOPE CHECK: If vertical movement is significant compared to horizontal, ignore swipe
+    // This allows native scrolling to work without triggering view changes
+    if (Math.abs(distanceY) > Math.abs(distanceX) * 0.8) return; 
+
+    const isLeftSwipe = distanceX > 50;
+    const isRightSwipe = distanceX < -50;
     
     const currentIndex = viewOrder.indexOf(activeView);
     
@@ -203,7 +210,13 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'planner' && (
-          <Planner tasks={tasks} setTasks={setTasks} selectedDate={selectedDate} lang={lang} />
+          <Planner 
+            tasks={tasks} 
+            setTasks={setTasks} 
+            selectedDate={selectedDate} 
+            onDateChange={setSelectedDate}
+            lang={lang} 
+          />
         )}
         {activeView === 'finance' && (
           <Finance 

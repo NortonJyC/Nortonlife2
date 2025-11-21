@@ -1,6 +1,7 @@
 
 export type Period = 'day' | 'week' | 'month';
 export type Priority = 'high' | 'medium' | 'low';
+export type TaskCategory = 'work' | 'life' | 'study' | 'health' | 'other';
 export type Language = 'zh' | 'en';
 
 export interface Task {
@@ -9,6 +10,7 @@ export interface Task {
   completed: boolean;
   period: Period;
   priority: Priority;
+  category: TaskCategory;
   date: string; // ISO Date string YYYY-MM-DD
   createdAt: number;
 }

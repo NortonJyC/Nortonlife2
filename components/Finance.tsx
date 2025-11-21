@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank, Check, PlusCircle, Pencil, Trash2, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings2, Utensils, Bus, Home, ShoppingBag, Gamepad2, Briefcase, HelpCircle, PiggyBank, Check, PlusCircle, Pencil, Trash2, RotateCcw, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
 import { Transaction, TransactionType, Language } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -20,6 +20,7 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
   // UI States
   const [isBudgetCollapsed, setIsBudgetCollapsed] = useState(true); // Default to collapsed to save space
   const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false); // For fly animation
 
   // Manual Form States - Amount is string
   const [amountStr, setAmountStr] = useState('');
@@ -70,6 +71,8 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
             date: Date.now(),
         };
         setTransactions([newTransaction, ...transactions]);
+        setIsAnimating(true);
+        setTimeout(() => setIsAnimating(false), 1000);
     }
     
     // Reset form
@@ -126,8 +129,15 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
   const categoryList = Object.keys(t.categories);
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500 pb-20">
+    <div className="space-y-4 animate-in fade-in duration-500 pb-20 relative">
       
+      {/* Animation Element */}
+      {isAnimating && (
+        <div className="animate-fly-down flex items-center justify-center bg-emerald-500 text-white p-3 rounded-full shadow-xl w-12 h-12 absolute left-1/2 -translate-x-1/2 top-96 z-50 border-2 border-white">
+            <DollarSign size={24} />
+        </div>
+      )}
+
       {/* Collapsible Budget Card */}
       <div className="relative rounded-3xl overflow-hidden shadow-lg shadow-blue-900/10 group transition-all">
           {/* Background */}
@@ -222,18 +232,18 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
               </button>
           )}
 
-          {/* Type Toggle */}
+          {/* Type Toggle - Enlarged */}
           {!editingId && (
-            <div className="flex bg-slate-100 p-1 rounded-xl scale-90 origin-right">
+            <div className="flex bg-slate-100 p-1.5 rounded-xl scale-100 origin-right">
                 <button 
                     onClick={() => setType('expense')}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${type === 'expense' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${type === 'expense' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}
                 >
                     {t.types.expense}
                 </button>
                 <button 
                     onClick={() => setType('income')}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${type === 'income' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${type === 'income' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}
                 >
                     {t.types.income}
                 </button>
@@ -311,10 +321,10 @@ const Finance: React.FC<FinanceProps> = ({ transactions, setTransactions, lang, 
                 <p>{t.no_transactions}</p>
             </div>
         )}
-        {transactions.slice(0, 20).map((t) => (
+        {transactions.slice(0, 20).map((t, index) => (
           <div
             key={t.id}
-            className={`flex items-center justify-between p-3 glass-card rounded-2xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100 hover:scale-[1.01] group ${editingId === t.id ? 'ring-2 ring-blue-200 bg-blue-50' : ''}`}
+            className={`flex items-center justify-between p-3 glass-card rounded-2xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100 hover:scale-[1.01] group ${editingId === t.id ? 'ring-2 ring-blue-200 bg-blue-50' : ''} ${index === 0 && isAnimating ? 'animate-in slide-in-from-top-4 duration-500' : ''}`}
           >
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">

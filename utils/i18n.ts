@@ -55,6 +55,7 @@ export const translations = {
       get_advice_ph: '获取今日 AI 规划建议...',
       empty: '当日暂无安排',
       priorities: { high: '重要', medium: '普通', low: '日常' },
+      categories: { work: '工作', life: '生活', study: '学习', health: '健康', other: '其他' },
       edit_task: '编辑任务'
     },
     finance: {
@@ -142,6 +143,7 @@ export const translations = {
       get_advice_ph: 'Get AI planning advice...',
       empty: 'No tasks for today',
       priorities: { high: 'High', medium: 'Medium', low: 'Low' },
+      categories: { work: 'Work', life: 'Life', study: 'Study', health: 'Health', other: 'Other' },
       edit_task: 'Edit Task'
     },
     finance: {

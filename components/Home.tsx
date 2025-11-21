@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight } from 'lucide-react';
+import { Plus, Zap, CheckCircle2, Pencil, Check, X, ArrowRight, DollarSign } from 'lucide-react';
 import { Task, Transaction, View, Language, GreetingData } from '../types';
 import { translations } from '../utils/i18n';
 
@@ -46,6 +46,7 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
       completed: false,
       period: 'day',
       priority: 'medium',
+      category: 'life', // Default category for quick add
       date: todayKey,
       createdAt: Date.now(),
     };
@@ -89,10 +90,17 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
   return (
     <div className="space-y-4 sm:space-y-6 relative">
         
-      {/* Fly Animation Element */}
+      {/* Fly Animation Element (Task) */}
       {isTaskAdded && (
         <div className="animate-fly-down flex items-center justify-center bg-blue-600 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/2 -translate-x-1/2 top-48 z-50">
             <Check size={20} />
+        </div>
+      )}
+
+      {/* Fly Animation Element (Finance) */}
+      {isFinanceAdded && (
+        <div className="animate-fly-down flex items-center justify-center bg-emerald-500 text-white p-2 rounded-full shadow-lg w-10 h-10 absolute left-1/2 -translate-x-1/2 top-48 z-50">
+            <DollarSign size={20} />
         </div>
       )}
 

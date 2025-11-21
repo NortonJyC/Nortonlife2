@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, CheckCircle2, Circle, Trash2, Sparkles, Pencil, X, Check } from 'lucide-react';
-import { Task, Priority, Language } from '../types';
+import { Plus, CheckCircle2, Circle, Trash2, Sparkles, Pencil, X, Check, ChevronLeft, ChevronRight, Briefcase, Home, GraduationCap, HeartPulse, Coffee } from 'lucide-react';
+import { Task, Priority, TaskCategory, Language } from '../types';
 import { getPlanningAssistant } from '../services/geminiService';
 import { translations } from '../utils/i18n';
 
@@ -9,16 +9,18 @@ interface PlannerProps {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   selectedDate: Date;
+  onDateChange?: (date: Date) => void;
   lang: Language;
 }
 
-const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }) => {
+const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, onDateChange, lang }) => {
   const t = translations[lang].planner;
   const tc = translations[lang].common;
 
   // State
   const [newTask, setNewTask] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
+  const [category, setCategory] = useState<TaskCategory>('life');
   const [aiTip, setAiTip] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
 
@@ -26,6 +28,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editTaskText, setEditTaskText] = useState('');
   const [editPriority, setEditPriority] = useState<Priority>('medium');
+  const [editCategory, setEditCategory] = useState<TaskCategory>('life');
 
   // Helpers
   const formatDateKey = (date: Date) => {
@@ -33,6 +36,14 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
   };
 
   const selectedDateKey = formatDateKey(selectedDate);
+
+  const handleDateChange = (offset: number) => {
+      if (onDateChange) {
+          const newDate = new Date(selectedDate);
+          newDate.setDate(newDate.getDate() + offset);
+          onDateChange(newDate);
+      }
+  };
 
   // Derived State
   const filteredTasks = useMemo(() => {
@@ -50,12 +61,14 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
       completed: false,
       period: 'day', // Legacy/Default
       priority: priority,
+      category: category,
       date: selectedDateKey,
       createdAt: Date.now(),
     };
     setTasks([task, ...tasks]);
     setNewTask('');
     setPriority('medium');
+    setCategory('life');
   };
 
   const toggleTask = (id: string) => {
@@ -71,6 +84,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
       setEditingTaskId(task.id);
       setEditTaskText(task.text);
       setEditPriority(task.priority);
+      setEditCategory(task.category || 'life');
   };
 
   const cancelEdit = () => {
@@ -80,7 +94,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
 
   const saveEdit = () => {
       if (editingTaskId && editTaskText.trim()) {
-          setTasks(tasks.map(t => t.id === editingTaskId ? { ...t, text: editTaskText, priority: editPriority } : t));
+          setTasks(tasks.map(t => t.id === editingTaskId ? { ...t, text: editTaskText, priority: editPriority, category: editCategory } : t));
           cancelEdit();
       }
   };
@@ -105,15 +119,48 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
       return t.priorities[p];
   }
 
+  const getCategoryIcon = (c: TaskCategory) => {
+      switch(c) {
+          case 'work': return <Briefcase size={12} />;
+          case 'life': return <Home size={12} />;
+          case 'study': return <GraduationCap size={12} />;
+          case 'health': return <HeartPulse size={12} />;
+          case 'other': return <Coffee size={12} />;
+          default: return <Circle size={12} />;
+      }
+  };
+
+  const getCategoryLabel = (c: TaskCategory) => {
+      return t.categories[c] || c;
+  };
+
+  const getCategoryColor = (c: TaskCategory) => {
+      switch(c) {
+          case 'work': return 'text-indigo-600 bg-indigo-50 border-indigo-100';
+          case 'life': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+          case 'study': return 'text-violet-600 bg-violet-50 border-violet-100';
+          case 'health': return 'text-rose-600 bg-rose-50 border-rose-100';
+          default: return 'text-slate-600 bg-slate-50 border-slate-100';
+      }
+  }
+
   return (
     <div className="space-y-4 animate-in fade-in duration-500 pb-20">
-      {/* Header Info */}
+      {/* Header Info with Date Navigation */}
       <div className="flex items-end justify-between px-2 pt-2">
         <div>
             <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">{t.daily_plan}</div>
-            <h2 className="text-2xl font-bold text-slate-800 drop-shadow-sm">
-                {selectedDateKey}
-            </h2>
+            <div className="flex items-center gap-2">
+                <button onClick={() => handleDateChange(-1)} className="p-1 hover:bg-white/50 rounded-full transition-colors text-slate-400 hover:text-slate-600">
+                    <ChevronLeft size={20} />
+                </button>
+                <h2 className="text-2xl font-bold text-slate-800 drop-shadow-sm">
+                    {selectedDateKey}
+                </h2>
+                <button onClick={() => handleDateChange(1)} className="p-1 hover:bg-white/50 rounded-full transition-colors text-slate-400 hover:text-slate-600">
+                    <ChevronRight size={20} />
+                </button>
+            </div>
         </div>
         <div className="text-right">
              <span className="text-3xl font-bold text-slate-200">{filteredTasks.filter(t => t.completed).length}</span>
@@ -145,8 +192,8 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
          </div>
       )}
 
-      {/* Add Task Form - Compact */}
-      <form onSubmit={addTask} className="relative flex gap-2">
+      {/* Add Task Form - Enhanced */}
+      <form onSubmit={addTask} className="relative flex flex-col gap-2">
         <div className="relative flex-1 group">
             <input
             type="text"
@@ -162,16 +209,30 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
             <Plus size={18} />
             </button>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <select 
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
-                className="h-full px-3 glass-input rounded-xl text-xs text-slate-700 outline-none font-medium cursor-pointer hover:bg-white/80 transition-colors"
+                className="px-3 py-2 glass-input rounded-xl text-xs text-slate-700 outline-none font-medium cursor-pointer hover:bg-white/80 transition-colors"
             >
                 <option value="high">{t.priorities.high}</option>
                 <option value="medium">{t.priorities.medium}</option>
                 <option value="low">{t.priorities.low}</option>
             </select>
+            
+            {/* Category Selector Pills */}
+            <div className="flex bg-white/40 p-1 rounded-xl gap-1">
+                {(['work', 'life', 'study', 'health', 'other'] as TaskCategory[]).map(cat => (
+                    <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setCategory(cat)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${category === cat ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        {t.categories[cat]}
+                    </button>
+                ))}
+            </div>
         </div>
       </form>
 
@@ -210,16 +271,29 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                         className="w-full p-2 rounded-lg bg-white border border-blue-200 outline-none text-slate-800 text-sm"
                         autoFocus
                     />
-                    <div className="flex justify-between items-center">
-                         <select 
-                            value={editPriority}
-                            onChange={(e) => setEditPriority(e.target.value as Priority)}
-                            className="text-xs p-1 rounded border border-slate-200 bg-white text-slate-700"
-                        >
-                            <option value="high">{t.priorities.high}</option>
-                            <option value="medium">{t.priorities.medium}</option>
-                            <option value="low">{t.priorities.low}</option>
-                        </select>
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                         <div className="flex gap-2">
+                            <select 
+                                value={editPriority}
+                                onChange={(e) => setEditPriority(e.target.value as Priority)}
+                                className="text-xs p-1 rounded border border-slate-200 bg-white text-slate-700"
+                            >
+                                <option value="high">{t.priorities.high}</option>
+                                <option value="medium">{t.priorities.medium}</option>
+                                <option value="low">{t.priorities.low}</option>
+                            </select>
+                            <select 
+                                value={editCategory}
+                                onChange={(e) => setEditCategory(e.target.value as TaskCategory)}
+                                className="text-xs p-1 rounded border border-slate-200 bg-white text-slate-700"
+                            >
+                                <option value="work">{t.categories.work}</option>
+                                <option value="life">{t.categories.life}</option>
+                                <option value="study">{t.categories.study}</option>
+                                <option value="health">{t.categories.health}</option>
+                                <option value="other">{t.categories.other}</option>
+                            </select>
+                         </div>
                         <div className="flex gap-2">
                             <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600"><X size={16}/></button>
                             <button onClick={saveEdit} className="p-1 text-blue-600 hover:text-blue-700"><Check size={16}/></button>
@@ -229,7 +303,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
             ) : (
                 // View Mode
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-3 flex-1 overflow-hidden">
                     <button
                         onClick={() => toggleTask(task.id)}
                         className={`flex-shrink-0 transition-all duration-300 transform active:scale-90 ${
@@ -245,9 +319,9 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                         )}
                     </button>
                     
-                    <div className="flex flex-col gap-0.5 transition-all duration-300">
+                    <div className="flex flex-col gap-0.5 transition-all duration-300 overflow-hidden w-full">
                         <span
-                            className={`text-slate-700 font-medium text-sm transition-all duration-300 ${
+                            className={`text-slate-700 font-medium text-sm transition-all duration-300 truncate ${
                             task.completed ? 'line-through text-slate-400' : ''
                             }`}
                         >
@@ -257,10 +331,13 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, selectedDate, lang }
                             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
                                 {getPriorityLabel(task.priority)}
                             </span>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${getCategoryColor(task.category || 'other')}`}>
+                                {getCategoryIcon(task.category || 'other')} {getCategoryLabel(task.category || 'other')}
+                            </span>
                         </div>
                     </div>
                     </div>
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity pl-2">
                         <button
                             onClick={() => startEdit(task)}
                             className="text-slate-400 hover:text-blue-500 p-2 transition-colors"
