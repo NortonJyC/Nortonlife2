@@ -172,7 +172,8 @@ const Home: React.FC<HomeProps> = ({ tasks, setTasks, transactions, setTransacti
                     className="glass-input p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-blue-200 transition-all text-sm placeholder:text-slate-400"
                 />
                 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Date and Category Selectors - Stacked on mobile, side-by-side on sm */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     <div className="relative">
                         <CalendarIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
                         <input 
